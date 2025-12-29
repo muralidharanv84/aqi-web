@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getDevices } from "../api/endpoints";
-import type { Device, DevicesResponse } from "../api/types";
+import type { DevicesResponse } from "../api/types";
 
 export function useDevices() {
   return useQuery({

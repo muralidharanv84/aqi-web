@@ -180,7 +180,7 @@ export default function DashboardPage() {
             { label: "Temp", value: "temperature_c" },
             { label: "RH", value: "humidity" },
           ]}
-          onChange={setSparkMetric}
+          onChange={(value) => setSparkMetric(value as MetricKey)}
         />
         {seriesLoading && seriesPoints.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
