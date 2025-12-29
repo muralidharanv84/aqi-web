@@ -10,6 +10,9 @@ import {
   YAxis,
 } from "recharts";
 import type { TooltipProps } from "recharts";
+import type { MetricKey } from "../domain/metrics";
+import { getMetricStatus } from "../domain/metrics";
+import { getAqiCategory } from "../domain/aqi";
 import { formatDateTimeMs } from "../domain/time";
 
 type SparkPoint = {
@@ -24,12 +27,14 @@ type SparklineProps = {
   points: SparkPoint[];
   metricLabel: string;
   rangeLabel: string;
+  metricKey: MetricKey;
 };
 
 export default function Sparkline({
   points,
   metricLabel,
   rangeLabel,
+  metricKey,
 }: SparklineProps) {
   const safePoints = useMemo(() => {
     return points.filter(
@@ -45,8 +50,12 @@ export default function Sparkline({
         min: point.min,
         max: point.max,
         n: point.n,
+        status:
+          metricKey === "aqi"
+            ? getAqiCategory(point.value)
+            : getMetricStatus(metricKey, point.value),
       })),
-    [safePoints]
+    [safePoints, metricKey]
   );
 
   const { maxValue, minValue } = useMemo(() => {
@@ -105,7 +114,7 @@ export default function Sparkline({
                   stroke="#0f172a"
                   strokeWidth={2.5}
                   dot={false}
-                  activeDot={{ r: 4, stroke: "#0f172a", strokeWidth: 2, fill: "#ffffff" }}
+                  activeDot={<ActiveDot />}
                 />
               </LineChart>
             </ResponsiveContainer>
@@ -135,6 +144,7 @@ function SparklineTooltip({
     min?: number;
     max?: number;
     n?: number;
+    status?: { label: string; color: string } | null;
   };
   if (!data) {
     return null;
@@ -144,8 +154,18 @@ function SparklineTooltip({
       <div className="text-[11px] uppercase tracking-wide text-slate-400">
         {metricLabel}
       </div>
-      <div className="text-lg font-semibold text-slate-900">
-        {data.value.toFixed(1)}
+      <div className="mt-1 flex items-center gap-2">
+        <div className="text-lg font-semibold text-slate-900">
+          {data.value.toFixed(1)}
+        </div>
+        {data.status ? (
+          <span
+            className="rounded-full px-2 py-0.5 text-[10px] font-semibold text-slate-700"
+            style={{ backgroundColor: `${data.status.color}22` }}
+          >
+            {data.status.label}
+          </span>
+        ) : null}
       </div>
       <div className="text-slate-500">
         {formatDateTimeMs(data.ts)}
@@ -159,5 +179,27 @@ function SparklineTooltip({
         <div className="text-slate-400">n={data.n}</div>
       ) : null}
     </div>
+  );
+}
+
+function ActiveDot(props: {
+  cx?: number;
+  cy?: number;
+  payload?: { status?: { color: string } | null };
+}) {
+  const { cx, cy, payload } = props;
+  if (!Number.isFinite(cx) || !Number.isFinite(cy)) {
+    return null;
+  }
+  const color = payload?.status?.color ?? "#0f172a";
+  return (
+    <circle
+      cx={cx}
+      cy={cy}
+      r={5}
+      stroke={color}
+      strokeWidth={2}
+      fill="#ffffff"
+    />
   );
 }

@@ -194,6 +194,7 @@ export default function DashboardPage() {
             points={seriesPoints}
             metricLabel={sparkMetricLabel}
             rangeLabel="Last 7 days"
+            metricKey={sparkMetric}
           />
         )}
       </div>
