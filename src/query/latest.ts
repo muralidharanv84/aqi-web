@@ -9,7 +9,7 @@ export function useLatest(deviceId: string | undefined) {
     queryKey: ["latest", deviceId],
     queryFn: () => getLatest(deviceId ?? ""),
     enabled: Boolean(deviceId),
-    refetchInterval: 600_000,
+    refetchInterval: 30_000,
     select: (data: LatestResponse) => {
       const ageMs = Date.now() - data.ts * 1000;
       return { ...data, stale: ageMs > STALE_AFTER_MS };
