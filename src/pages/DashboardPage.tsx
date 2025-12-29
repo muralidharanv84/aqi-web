@@ -13,6 +13,7 @@ import {
   getMetricDefinition,
 } from "../domain/metrics";
 import type { MetricKey } from "../domain/metrics";
+import { formatDateTime } from "../domain/time";
 import { useDevices } from "../query/devices";
 import { useLatest } from "../query/latest";
 import { useSeries } from "../query/series";
@@ -83,9 +84,7 @@ export default function DashboardPage() {
       ? getAqiCategory(aqiValue)
       : undefined;
 
-  const lastUpdated = latest?.ts
-    ? new Date(latest.ts * 1000).toLocaleString()
-    : undefined;
+  const lastUpdated = latest?.ts ? formatDateTime(latest.ts) : undefined;
 
   const sparkMetricLabel = getMetricDefinition(sparkMetric).label;
 

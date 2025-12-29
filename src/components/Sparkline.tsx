@@ -1,9 +1,23 @@
-import { useMemo, useState } from "react";
-import type React from "react";
+import { useMemo } from "react";
+import {
+  CartesianGrid,
+  Line,
+  LineChart,
+  ReferenceLine,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
+} from "recharts";
+import type { TooltipProps } from "recharts";
+import { formatDateTimeMs } from "../domain/time";
 
 type SparkPoint = {
   ts: number;
   value: number;
+  min?: number;
+  max?: number;
+  n?: number;
 };
 
 type SparklineProps = {
@@ -12,70 +26,39 @@ type SparklineProps = {
   rangeLabel: string;
 };
 
-type TooltipState = {
-  x: number;
-  y: number;
-  point: SparkPoint;
-} | null;
-
 export default function Sparkline({
   points,
   metricLabel,
   rangeLabel,
 }: SparklineProps) {
-  const [tooltip, setTooltip] = useState<TooltipState>(null);
+  const safePoints = useMemo(() => {
+    return points.filter(
+      (point) => Number.isFinite(point.value) && Number.isFinite(point.ts)
+    );
+  }, [points]);
 
-  const safePoints = useMemo(
+  const chartData = useMemo(
     () =>
-      points.filter(
-        (point) => Number.isFinite(point.value) && Number.isFinite(point.ts)
-      ),
-    [points]
+      safePoints.map((point) => ({
+        ts: point.ts * 1000,
+        value: point.value,
+        min: point.min,
+        max: point.max,
+        n: point.n,
+      })),
+    [safePoints]
   );
 
-  const { path, min, max } = useMemo(() => {
+  const { maxValue, minValue } = useMemo(() => {
     if (safePoints.length === 0) {
-      return { path: "", min: 0, max: 0 };
+      return { minValue: 0, maxValue: 0 };
     }
     const values = safePoints.map((point) => point.value);
-    const minValue = Math.min(...values);
-    const maxValue = Math.max(...values);
-    const range = maxValue - minValue || 1;
-
-    const coords = safePoints.map((point, index) => {
-      const x = (index / (safePoints.length - 1 || 1)) * 100;
-      const y = 100 - ((point.value - minValue) / range) * 100;
-      return `${x},${y}`;
-    });
-
-    return {
-      path: coords.join(" "),
-      min: minValue,
-      max: maxValue,
-    };
+    return { minValue: Math.min(...values), maxValue: Math.max(...values) };
   }, [safePoints]);
 
-  function handlePointer(event: React.MouseEvent<SVGSVGElement>) {
-    if (safePoints.length === 0) {
-      return;
-    }
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const ratio = (event.clientX - bounds.left) / bounds.width;
-    const index = Math.min(
-      safePoints.length - 1,
-      Math.max(0, Math.round(ratio * (safePoints.length - 1)))
-    );
-    const point = safePoints[index];
-    setTooltip({
-      x: event.clientX - bounds.left,
-      y: event.clientY - bounds.top,
-      point,
-    });
-  }
-
-  function handleLeave() {
-    setTooltip(null);
-  }
+  const yMax = Math.max(0, maxValue);
+  const yDomainMax = Math.max(1, Math.ceil(yMax * 1.1 * 10) / 10);
 
   return (
     <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -84,47 +67,97 @@ export default function Sparkline({
         <div>{rangeLabel}</div>
       </div>
       <div className="relative mt-4">
-        <svg
-          viewBox="0 0 100 100"
-          className="h-28 w-full"
-          onMouseMove={handlePointer}
-          onMouseLeave={handleLeave}
-        >
-          {path ? (
-            <polyline
-              fill="none"
-              stroke="#0f172a"
-              strokeWidth="2"
-              points={path}
-            />
-          ) : null}
-          <line
-            x1="0"
-            y1="100"
-            x2="100"
-            y2="100"
-            stroke="#e2e8f0"
-            strokeWidth="1"
-          />
-        </svg>
-        {tooltip ? (
-          <div
-            className="pointer-events-none absolute max-w-[240px] rounded-md border border-slate-200 bg-white px-2 py-1 text-xs text-slate-700 shadow"
-            style={{
-              left: Math.min(tooltip.x + 8, 220),
-              top: Math.max(tooltip.y - 32, 0),
-            }}
-          >
-            <div className="font-semibold">{tooltip.point.value}</div>
-            <div className="text-slate-500">
-              {new Date(tooltip.point.ts * 1000).toLocaleString()}
-            </div>
+        {safePoints.length === 0 ? (
+          <div className="flex h-28 items-center justify-center rounded-lg border border-dashed border-slate-200 text-sm text-slate-500">
+            No data for this range.
           </div>
-        ) : null}
+        ) : (
+          <div className="h-40 w-full">
+            <ResponsiveContainer>
+              <LineChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+                <CartesianGrid stroke="#e2e8f0" strokeDasharray="4 4" />
+                <XAxis
+                  dataKey="ts"
+                  type="number"
+                  scale="time"
+                  domain={["dataMin", "dataMax"]}
+                  tickFormatter={(value) => formatDateTimeMs(value as number)}
+                  tick={{ fill: "#94a3b8", fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  minTickGap={24}
+                />
+                <YAxis
+                  domain={[0, yDomainMax]}
+                  tick={{ fill: "#94a3b8", fontSize: 11 }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={40}
+                  tickFormatter={(value) => (value as number).toFixed(1)}
+                />
+                <ReferenceLine y={0} stroke="#e2e8f0" />
+                <Tooltip
+                  content={<SparklineTooltip metricLabel={metricLabel} />}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#0f172a"
+                  strokeWidth={2.5}
+                  dot={false}
+                  activeDot={{ r: 4, stroke: "#0f172a", strokeWidth: 2, fill: "#ffffff" }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        )}
       </div>
       <div className="mt-2 text-xs text-slate-500">
-        {path ? `Range: ${min.toFixed(0)}-${max.toFixed(0)}` : "No data"}
+        {safePoints.length
+          ? `Range: ${minValue.toFixed(1)}-${maxValue.toFixed(1)}`
+          : "No data"}
       </div>
     </section>
+  );
+}
+
+function SparklineTooltip({
+  active,
+  payload,
+  metricLabel,
+}: TooltipProps<number, string> & { metricLabel: string }) {
+  if (!active || !payload || payload.length === 0) {
+    return null;
+  }
+  const data = payload[0]?.payload as {
+    ts: number;
+    value: number;
+    min?: number;
+    max?: number;
+    n?: number;
+  };
+  if (!data) {
+    return null;
+  }
+  return (
+    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-lg">
+      <div className="text-[11px] uppercase tracking-wide text-slate-400">
+        {metricLabel}
+      </div>
+      <div className="text-lg font-semibold text-slate-900">
+        {data.value.toFixed(1)}
+      </div>
+      <div className="text-slate-500">
+        {formatDateTimeMs(data.ts)}
+      </div>
+      {Number.isFinite(data.min) && Number.isFinite(data.max) ? (
+        <div className="mt-1 text-slate-500">
+          Min/Max: {data.min?.toFixed(1)} / {data.max?.toFixed(1)}
+        </div>
+      ) : null}
+      {Number.isFinite(data.n) ? (
+        <div className="text-slate-400">n={data.n}</div>
+      ) : null}
+    </div>
   );
 }

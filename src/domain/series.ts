@@ -5,6 +5,9 @@ export type SeriesResolution = "raw" | "1h";
 export type NormalizedSeriesPoint = {
   ts: number;
   value: number;
+  min?: number;
+  max?: number;
+  n?: number;
 };
 
 const ONE_DAY_SECONDS = 24 * 60 * 60;
@@ -72,7 +75,13 @@ export function normalizeSeriesPoints(
       invalidCount += 1;
       continue;
     }
-    points.push({ ts: ts as number, value: value as number });
+    points.push({
+      ts: ts as number,
+      value: value as number,
+      min: typeof point.min === "number" ? point.min : undefined,
+      max: typeof point.max === "number" ? point.max : undefined,
+      n: typeof point.n === "number" ? point.n : undefined,
+    });
   }
 
   return { points, invalidCount };
