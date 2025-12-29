@@ -2,6 +2,12 @@
 
 ## Component-Level Spec (MVP Dashboard + Sparkline)
 
+### Mobile-First Constraints
+- Single-column layout on small screens with generous spacing.
+- Minimum 44px touch targets for all interactive controls.
+- No hover-only affordances; all actions are tappable.
+- Segmented control should scroll horizontally if it overflows.
+
 ### Pages & Routing
 - `DashboardPage`
   - Route: `/:deviceId/` with default redirect `/` → `/murali-1/`
@@ -73,7 +79,9 @@
    - Build `DevicePicker`, `AqiHero`, `MetricCards`, `MetricSegmentedControl`, `Sparkline`.
 6. **Dashboard page assembly**
    - Implement data wiring, device routing, sparkline metric switching, and 7d range.
-7. **Polish + edge cases**
+7. **Mobile responsiveness pass**
+   - Ensure single-column layout, min touch sizes, and overflow-safe controls.
+8. **Polish + edge cases**
    - Empty states, loading skeletons, offline banner, and null-metric hiding.
-8. **Validation**
+9. **Validation**
    - Smoke-test: device switch, polling refresh, sparkline switch, stale behavior.

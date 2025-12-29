@@ -15,6 +15,7 @@ The frontend prioritizes:
 - Clean, calm, high-signal UI
 - A gentle on-ramp for casual users
 - Deep, powerful charts for users who care
+- Mobile-first usability across the entire product
 
 No login. No editing. Read-only and fast.
 
@@ -26,6 +27,7 @@ No login. No editing. Read-only and fast.
 - Make **current AQI** instantly understandable
 - Follow **US AQI standards** for categorization and color
 - Support **multiple devices**
+- Be fully usable on mobile, tablet, and desktop from day one
 - Render timestamps in **browser timezone**
 - Provide **powerful historical charts** without overwhelming the MVP
 - Remain **100% static** (no SSR, no server dependencies)
@@ -135,6 +137,10 @@ MVP scope:
 
 This section dominates the page visually.
 
+Mobile notes:
+- Use a single-column layout with generous tap targets.
+- Keep the AQI number visible without scrolling on common phone sizes.
+
 ---
 
 #### Supporting Metrics (Secondary)
@@ -152,6 +158,10 @@ Rules:
 - No aggressive color coding (avoid noise)
 - If a metric is null/missing, hide that card
 
+Mobile notes:
+- Wrap cards into 2-column grid on small screens.
+- Ensure card hit areas are at least 44px tall.
+
 ---
 
 #### Mini Trend (MVP)
@@ -160,6 +170,10 @@ Rules:
 - Tooltip with timestamp + value
 - Ability to switch the sparkline metric (AQI / PM2.5 / CO₂ / VOC / Temp / RH)
   - Use a compact segmented control for a clean UI (default to AQI)
+
+Mobile notes:
+- Segmented control should be horizontally scrollable if it overflows.
+- Tooltip content should be brief and not cover the entire chart.
 
 ---
 
@@ -174,6 +188,11 @@ Rules:
 ### 5.2 Advanced Charts (/:deviceId/charts)
 
 Designed for power users.
+
+Mobile notes:
+- Default to single-metric view on small screens.
+- Place controls in a collapsible panel or stacked layout to avoid crowding.
+- Enable horizontal panning/zooming on charts if supported by the library.
 
 #### Defaults
 - Time range: **7 days**
@@ -316,6 +335,11 @@ Staleness:
 - Light mode default
 - Dark mode optional (later)
 
+Responsive layout:
+- Mobile-first breakpoints; single-column on phones.
+- Target 44px minimum touch sizes for all controls.
+- Avoid hover-only interactions; all actions must be tappable.
+
 ---
 
 ## 11. Accessibility
@@ -323,6 +347,7 @@ Staleness:
 - Adequate contrast ratios
 - Keyboard-accessible controls
 - Screen-reader friendly headings
+- Touch targets meet mobile accessibility sizing guidance
 
 ---
 
