@@ -1,6 +1,13 @@
 type QueryParams = Record<string, string | number | boolean | undefined | null>;
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL?.toString() ?? "";
+type ApiGetOptions<T> = {
+  allowNotFound?: boolean;
+  empty?: T;
+};
+
+const baseUrl =
+  import.meta.env.VITE_API_BASE_URL?.toString() ??
+  "https://aqi-backend.orangeiqlabs.com";
 
 function buildUrl(path: string, params?: QueryParams) {
   const url = new URL(path, baseUrl || window.location.origin);
@@ -15,8 +22,17 @@ function buildUrl(path: string, params?: QueryParams) {
   return url.toString();
 }
 
-export async function apiGet<T>(path: string, params?: QueryParams): Promise<T> {
-  const response = await fetch(buildUrl(path, params));
+export async function apiGet<T>(
+  path: string,
+  params?: QueryParams,
+  options?: ApiGetOptions<T>
+): Promise<T> {
+  const fetch_url = buildUrl(path, params);
+  console.log("Fetching data from url: " + fetch_url);
+  const response = await fetch(fetch_url);
+  if (response.status === 404 && options?.allowNotFound) {
+    return options.empty as T;
+  }
   if (!response.ok) {
     throw new Error(`Request failed: ${response.status}`);
   }

@@ -1,31 +1,38 @@
 export type Device = {
-  id: string;
-  name?: string;
+  device_id: string;
   timezone?: string;
 };
 
+export type DevicesResponse = {
+  devices: Device[];
+};
+
 export type LatestResponse = {
-  timestamp: number;
-  aqi: number | null;
-  pm25: number | null;
-  co2: number | null;
-  voc_index: number | null;
-  voc_ppm: number | null;
-  temperature_c: number | null;
-  humidity: number | null;
+  device_id: string;
+  ts: number;
+  metrics: Record<string, number | null | undefined>;
   [key: string]: unknown;
 };
 
 export type SeriesPoint = {
-  ts: number;
-  value: number;
+  ts?: number;
+  t?: number;
+  time?: number;
+  timestamp?: number;
+  value?: number;
+  v?: number;
+  avg?: number;
   min?: number;
   max?: number;
   n?: number;
+  metrics?: Record<string, number | null | undefined>;
 };
 
 export type SeriesResponse = {
-  metric: string;
-  resolution: "raw" | "1h" | string;
-  points: SeriesPoint[];
+  metric?: string;
+  resolution?: "raw" | "1h" | string;
+  points?: SeriesPoint[];
+  data?: SeriesPoint[];
+  series?: SeriesPoint[];
+  [key: string]: unknown;
 };

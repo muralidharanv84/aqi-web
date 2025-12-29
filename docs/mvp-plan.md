@@ -37,7 +37,7 @@
 - `query/latest.ts`
   - `useLatest(deviceId)`; polls every 60s; `stale` if `now - latest.timestamp > 5m`.
 - `query/series.ts`
-  - `useSeries(deviceId, metric, from, to, resolution)`; MVP uses `metric` + 7d range + `resolution=auto`.
+  - `useSeries(deviceId, metric, from, to, resolution)`; MVP uses `metric` + 7d range + `resolution=1h` (use `raw` for ranges under 24h).
 
 ### UI Components
 - `DevicePicker`

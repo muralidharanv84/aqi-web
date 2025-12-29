@@ -108,6 +108,12 @@ Query params:
 - to (epoch seconds)
 - resolution = raw | 1h
 
+Notes:
+- Metric name for AQI is `aqi_us`.
+- `raw` supports a max duration of 14 days.
+- Use `raw` for ranges under 24 hours; otherwise use `1h`.
+- A future `24h` (daily) aggregation will be added.
+
 Used for:
 - Sparkline trends
 - Advanced charts
@@ -175,6 +181,9 @@ Mobile notes:
 - Segmented control should be horizontally scrollable if it overflows.
 - Tooltip content should be brief and not cover the entire chart.
 
+Resolution notes:
+- Use `raw` for ranges under 24 hours; otherwise use `1h`.
+
 ---
 
 #### Device Picker
@@ -197,7 +206,7 @@ Mobile notes:
 #### Defaults
 - Time range: **7 days**
 - Metric: AQI
-- Resolution: **Auto**
+- Resolution: **1h**
 - Single device
 
 ---
@@ -211,9 +220,8 @@ Mobile notes:
   - 30d
   - Custom
 - Resolution selector:
-  - Auto (default)
   - Raw
-  - Hourly (1h)
+  - 1h
 
 ---
 
@@ -284,14 +292,11 @@ Implementation detail:
 
 ---
 
-### Resolution Auto-Selection
-When resolution=auto:
-
-- If time range ≤ 36 hours → raw
-- Else → 1h
-- If raw would exceed ~2,500 points → force 1h
-
-This keeps charts fast and readable.
+### Resolution Selection
+- Use `raw` for ranges under 24 hours.
+- Use `1h` for ranges over 24 hours.
+- `raw` supports a maximum window of 14 days.
+- A future `24h` (daily) aggregation will be added for longer windows.
 
 ---
 
