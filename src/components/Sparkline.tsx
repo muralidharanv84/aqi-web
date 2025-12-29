@@ -1,8 +1,8 @@
-import { useMemo } from "react";
+import { useId, useMemo } from "react";
 import {
+  Area,
+  AreaChart,
   CartesianGrid,
-  Line,
-  LineChart,
   ReferenceLine,
   ResponsiveContainer,
   Tooltip,
@@ -58,6 +58,23 @@ export default function Sparkline({
     [safePoints, metricKey]
   );
 
+  const gradientId = useId();
+  const gradientStops = useMemo(() => {
+    if (chartData.length < 2) {
+      return [];
+    }
+    return chartData.map((point, index) => {
+      const offset =
+        chartData.length === 1
+          ? 0
+          : (index / (chartData.length - 1)) * 100;
+      return {
+        offset,
+        color: point.status?.color ?? "#0f172a",
+      };
+    });
+  }, [chartData]);
+
   const { maxValue, minValue } = useMemo(() => {
     if (safePoints.length === 0) {
       return { minValue: 0, maxValue: 0 };
@@ -81,9 +98,47 @@ export default function Sparkline({
             No data for this range.
           </div>
         ) : (
-          <div className="h-40 w-full">
+          <div className="h-44 w-full">
             <ResponsiveContainer>
-              <LineChart data={chartData} margin={{ top: 8, right: 12, left: 0, bottom: 0 }}>
+              <AreaChart
+                data={chartData}
+                margin={{ top: 8, right: 12, left: 0, bottom: 0 }}
+              >
+                {gradientStops.length > 0 ? (
+                  <defs>
+                    <linearGradient
+                      id={`line-gradient-${gradientId}`}
+                      x1="0"
+                      y1="0"
+                      x2="1"
+                      y2="0"
+                    >
+                      {gradientStops.map((stop) => (
+                        <stop
+                          key={`line-stop-${stop.offset}`}
+                          offset={`${stop.offset}%`}
+                          stopColor={stop.color}
+                        />
+                      ))}
+                    </linearGradient>
+                    <linearGradient
+                      id={`area-gradient-${gradientId}`}
+                      x1="0"
+                      y1="0"
+                      x2="1"
+                      y2="0"
+                    >
+                      {gradientStops.map((stop) => (
+                        <stop
+                          key={`area-stop-${stop.offset}`}
+                          offset={`${stop.offset}%`}
+                          stopColor={stop.color}
+                          stopOpacity={0.25}
+                        />
+                      ))}
+                    </linearGradient>
+                  </defs>
+                ) : null}
                 <CartesianGrid stroke="#e2e8f0" strokeDasharray="4 4" />
                 <XAxis
                   dataKey="ts"
@@ -108,15 +163,25 @@ export default function Sparkline({
                 <Tooltip
                   content={<SparklineTooltip metricLabel={metricLabel} />}
                 />
-                <Line
+                <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="#0f172a"
+                  stroke={
+                    gradientStops.length > 0
+                      ? `url(#line-gradient-${gradientId})`
+                      : "#0f172a"
+                  }
                   strokeWidth={2.5}
+                  fill={
+                    gradientStops.length > 0
+                      ? `url(#area-gradient-${gradientId})`
+                      : "rgba(15, 23, 42, 0.08)"
+                  }
+                  fillOpacity={1}
                   dot={false}
                   activeDot={<ActiveDot />}
                 />
-              </LineChart>
+              </AreaChart>
             </ResponsiveContainer>
           </div>
         )}
