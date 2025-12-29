@@ -75,6 +75,9 @@ Used for:
 - Device picker
 - Determining device timezone (hourly aggregation semantics)
 
+Ordering:
+- Sort by device id in the UI (ascending).
+
 ---
 
 #### Latest Values
@@ -86,6 +89,9 @@ Used for:
 - AQI hero card
 - Supporting sensor metrics
 - “Last updated” timestamp
+
+Notes:
+- AQI value is provided by the API; frontend applies US AQI category/color/description.
 
 ---
 
@@ -116,6 +122,8 @@ GET /api/v1/health
 ## 5. Core UX Concepts
 
 ### 5.1 Dashboard (/:deviceId/)
+MVP scope:
+- Only the dashboard and sparkline are in MVP (no charts or about pages).
 
 #### AQI Hero (Primary Focus)
 - Very large AQI number
@@ -142,6 +150,7 @@ Rules:
 - Smaller font than AQI
 - Always visible
 - No aggressive color coding (avoid noise)
+- If a metric is null/missing, hide that card
 
 ---
 
@@ -150,6 +159,7 @@ Rules:
 - Default range: **last 7 days**
 - Tooltip with timestamp + value
 - Ability to switch the sparkline metric (AQI / PM2.5 / CO₂ / VOC / Temp / RH)
+  - Use a compact segmented control for a clean UI (default to AQI)
 
 ---
 
@@ -230,6 +240,9 @@ Each category defines:
 
 AQI interpretation logic lives entirely in the frontend domain layer.
 
+Implementation detail:
+- Map ranges to explicit hex colors in `domain/aqi.ts` for consistent UI.
+
 ---
 
 ## 7. Time & Timezones
@@ -281,6 +294,9 @@ This keeps charts fast and readable.
   - Show a subtle offline banner
   - Keep last cached values visible
   - Mark readings as “stale”
+
+Staleness:
+- Flag stale when `now - latest.timestamp` exceeds a threshold (e.g., 5 minutes).
 
 ---
 
