@@ -11,6 +11,7 @@ import {
   formatMetricValue,
   getMetricApiKey,
   getMetricDefinition,
+  getMetricStatus,
 } from "../domain/metrics";
 import type { MetricKey } from "../domain/metrics";
 import { formatDateTime } from "../domain/time";
@@ -70,10 +71,12 @@ export default function DashboardPage() {
       .filter((entry) => entry.value !== null && entry.value !== undefined)
       .map((entry) => {
         const definition = getMetricDefinition(entry.key);
+        const status = getMetricStatus(entry.key, entry.value as number);
         return {
           key: entry.key,
           label: definition.label,
           value: formatMetricValue(entry.key, entry.value as number),
+          status,
         };
       });
   }, [latest]);

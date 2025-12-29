@@ -16,15 +16,19 @@ export default function AqiHero({
   stale,
 }: AqiHeroProps) {
   const background = category?.color ?? "#e2e8f0";
+  const tint = `${background}33`;
 
   return (
     <section
       className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-      style={{ boxShadow: `0 0 0 1px ${background}20` }}
+      style={{
+        boxShadow: `0 0 0 2px ${background}55`,
+        borderColor: `${background}80`,
+      }}
     >
       <div
         className="absolute inset-0 opacity-10"
-        style={{ background }}
+        style={{ background: tint }}
         aria-hidden="true"
       />
       <div className="relative">
