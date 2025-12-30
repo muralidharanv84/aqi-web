@@ -180,6 +180,7 @@ export default function Sparkline({
                   fillOpacity={1}
                   dot={false}
                   activeDot={<ActiveDot />}
+                  isAnimationActive={false}
                 />
               </AreaChart>
             </ResponsiveContainer>
