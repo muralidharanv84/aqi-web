@@ -59,3 +59,7 @@ export function getAqiCategory(aqi: number): AqiCategory {
   }
   return AQI_CATEGORIES[AQI_CATEGORIES.length - 1];
 }
+
+export function getAqiCategoryForValue(aqi: number): AqiCategory {
+  return getAqiCategory(Math.round(aqi));
+}

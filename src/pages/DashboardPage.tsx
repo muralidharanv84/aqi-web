@@ -6,7 +6,7 @@ import DevicePicker from "../components/DevicePicker";
 import MetricCards from "../components/MetricCards";
 import MetricSegmentedControl from "../components/MetricSegmentedControl";
 import Sparkline from "../components/Sparkline";
-import { getAqiCategory } from "../domain/aqi";
+import { getAqiCategoryForValue } from "../domain/aqi";
 import {
   formatMetricValue,
   getMetricApiKey,
@@ -94,7 +94,7 @@ export default function DashboardPage() {
   const aqiValue = latest?.metrics?.aqi_us;
   const category =
     aqiValue !== null && aqiValue !== undefined
-      ? getAqiCategory(aqiValue)
+      ? getAqiCategoryForValue(aqiValue)
       : undefined;
 
   const lastUpdated = latest?.ts ? formatDateTime(latest.ts) : undefined;

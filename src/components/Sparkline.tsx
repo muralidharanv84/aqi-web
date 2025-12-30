@@ -12,7 +12,7 @@ import {
 import type { TooltipProps } from "recharts";
 import type { MetricKey } from "../domain/metrics";
 import { getMetricStatus } from "../domain/metrics";
-import { getAqiCategory } from "../domain/aqi";
+import { getAqiCategoryForValue } from "../domain/aqi";
 import { formatDateTimeMs } from "../domain/time";
 
 type SparkPoint = {
@@ -54,7 +54,7 @@ function Sparkline({
         n: point.n,
         status:
           metricKey === "aqi"
-            ? getAqiCategory(point.value)
+            ? getAqiCategoryForValue(point.value)
             : getMetricStatus(metricKey, point.value),
       })),
     [safePoints, metricKey]
@@ -170,7 +170,12 @@ function Sparkline({
                 />
                 <ReferenceLine y={0} stroke="#e2e8f0" />
                 <Tooltip
-                  content={<SparklineTooltip metricLabel={metricLabel} />}
+                  content={
+                    <SparklineTooltip
+                      metricLabel={metricLabel}
+                      metricKey={metricKey}
+                    />
+                  }
                 />
                 <Area
                   type="monotone"
@@ -218,7 +223,11 @@ function SparklineTooltip({
   active,
   payload,
   metricLabel,
-}: TooltipProps<number, string> & { metricLabel: string }) {
+  metricKey,
+}: TooltipProps<number, string> & {
+  metricLabel: string;
+  metricKey: MetricKey;
+}) {
   if (!active || !payload || payload.length === 0) {
     return null;
   }
@@ -240,7 +249,9 @@ function SparklineTooltip({
       </div>
       <div className="mt-1 flex items-center gap-2">
         <div className="text-lg font-semibold text-slate-900">
-          {data.value.toFixed(1)}
+          {metricKey === "aqi"
+            ? Math.round(data.value).toString()
+            : data.value.toFixed(1)}
         </div>
         {data.status ? (
           <span
