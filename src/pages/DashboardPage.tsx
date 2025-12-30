@@ -37,8 +37,10 @@ export default function DashboardPage() {
     error: latestErrorDetail,
   } = useLatest(deviceId);
 
-  const to = Math.floor(Date.now() / 1000);
-  const from = to - 7 * 24 * 60 * 60;
+  const { from, to } = useMemo(() => {
+    const end = Math.floor(Date.now() / 1000);
+    return { from: end - 7 * 24 * 60 * 60, to: end };
+  }, [deviceId, sparkMetric]);
 
   const {
     data: seriesData,
@@ -53,6 +55,14 @@ export default function DashboardPage() {
   });
   const seriesPoints = seriesData?.points ?? [];
   const invalidSeriesCount = seriesData?.invalidCount ?? 0;
+  const seriesSignature = useMemo(() => {
+    if (seriesPoints.length === 0) {
+      return "empty";
+    }
+    const first = seriesPoints[0];
+    const last = seriesPoints[seriesPoints.length - 1];
+    return `${seriesPoints.length}:${first.ts}:${first.value}:${last.ts}:${last.value}`;
+  }, [seriesPoints]);
 
   const cards = useMemo(() => {
     if (!latest) {
@@ -195,6 +205,7 @@ export default function DashboardPage() {
             metricLabel={sparkMetricLabel}
             rangeLabel="Last 7 days"
             metricKey={sparkMetric}
+            seriesSignature={seriesSignature}
           />
         )}
       </div>

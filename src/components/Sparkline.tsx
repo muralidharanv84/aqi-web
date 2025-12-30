@@ -1,4 +1,4 @@
-import { useId, useMemo } from "react";
+import { memo, useEffect, useId, useMemo, useRef } from "react";
 import {
   Area,
   AreaChart,
@@ -28,13 +28,15 @@ type SparklineProps = {
   metricLabel: string;
   rangeLabel: string;
   metricKey: MetricKey;
+  seriesSignature: string;
 };
 
-export default function Sparkline({
+function Sparkline({
   points,
   metricLabel,
   rangeLabel,
   metricKey,
+  seriesSignature,
 }: SparklineProps) {
   const safePoints = useMemo(() => {
     return points.filter(
@@ -57,6 +59,13 @@ export default function Sparkline({
       })),
     [safePoints, metricKey]
   );
+
+  const lastSignatureRef = useRef<string | null>(null);
+  const shouldAnimate = lastSignatureRef.current !== seriesSignature;
+
+  useEffect(() => {
+    lastSignatureRef.current = seriesSignature;
+  }, [seriesSignature]);
 
   const gradientId = useId();
   const gradientStops = useMemo(() => {
@@ -180,7 +189,7 @@ export default function Sparkline({
                   fillOpacity={1}
                   dot={false}
                   activeDot={<ActiveDot />}
-                  isAnimationActive={false}
+                  isAnimationActive={shouldAnimate}
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -195,6 +204,15 @@ export default function Sparkline({
     </section>
   );
 }
+
+export default memo(
+  Sparkline,
+  (prev, next) =>
+    prev.seriesSignature === next.seriesSignature &&
+    prev.metricKey === next.metricKey &&
+    prev.metricLabel === next.metricLabel &&
+    prev.rangeLabel === next.rangeLabel
+);
 
 function SparklineTooltip({
   active,
