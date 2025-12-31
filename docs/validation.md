@@ -26,9 +26,13 @@
 - Navigate to `/:deviceId/charts` and confirm page renders.
 - Metric selector supports multi-select and updates the chart.
 - Time range selector updates query range (1h, 24h, 7d, 30d, custom).
+- Time range selector includes 1y and All time.
+- Custom range accepts valid datetime inputs and blocks invalid ranges.
 - Resolution is chosen automatically from the range (no user control).
 - Default chart is AQI with 7d range and automatic `1h` resolution.
 - Empty state shows when no series data exists.
+- Device timezone hint appears when device timezone is available.
+- Error banner appears when series data fails to load.
 
 ## About Page (v1)
 - Navigate to `/:deviceId/about` and confirm page renders.

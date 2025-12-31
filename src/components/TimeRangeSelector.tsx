@@ -23,7 +23,7 @@ export default function TimeRangeSelector({
           <button
             key={option.value}
             type="button"
-            className={`min-h-[44px] rounded-full px-4 text-sm transition ${
+            className={`min-h-[44px] rounded-full px-4 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
               option.disabled
                 ? "cursor-not-allowed border border-slate-200 bg-slate-100 text-slate-400"
                 : active

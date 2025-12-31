@@ -7,7 +7,10 @@ import { useDevices } from "../query/devices";
 export default function AboutPage() {
   const navigate = useNavigate();
   const { deviceId } = useParams();
-  const { data: devices = [] } = useDevices();
+  const {
+    data: devices = [],
+    isError: devicesError,
+  } = useDevices();
 
   return (
     <AppShell
@@ -23,6 +26,11 @@ export default function AboutPage() {
       }
     >
       <div className="space-y-6">
+        {devicesError ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Some data failed to load (devices). Showing the most recent cached values.
+          </div>
+        ) : null}
         <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="text-sm font-medium uppercase tracking-wide text-slate-500">
             About AQI

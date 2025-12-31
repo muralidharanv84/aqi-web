@@ -50,7 +50,10 @@ function formatDateTimeInput(value: Date) {
 export default function ChartsPage() {
   const navigate = useNavigate();
   const { deviceId } = useParams();
-  const { data: devices = [] } = useDevices();
+  const {
+    data: devices = [],
+    isError: devicesError,
+  } = useDevices();
   const [selectedMetrics, setSelectedMetrics] = useState<MetricKey[]>(["aqi"]);
   const [rangePreset, setRangePreset] = useState(DEFAULT_RANGE);
   const [customFrom, setCustomFrom] = useState(() => {
@@ -115,12 +118,19 @@ export default function ChartsPage() {
     getMetricApiKey(metricKey)
   );
 
-  const { seriesByMetric, invalidCountByMetric, resolution } = useMultiSeries({
+  const {
+    seriesByMetric,
+    invalidCountByMetric,
+    resolution,
+    queries: seriesQueries,
+  } = useMultiSeries({
     deviceId,
     metrics: metricApiKeys,
     from,
     to,
   });
+  const seriesLoading = seriesQueries.some((query) => query.isLoading);
+  const seriesError = seriesQueries.some((query) => query.isError);
 
   const seriesByMetricKey = useMemo(() => {
     const map: Record<string, NormalizedSeriesPoint[]> = {};
@@ -177,6 +187,14 @@ export default function ChartsPage() {
     })
     .join(", ");
 
+  const activeDevice = devices.find((device) => device.device_id === deviceId);
+  const errorSources = [
+    devicesError ? "devices" : null,
+    seriesError ? "series" : null,
+  ]
+    .filter(Boolean)
+    .join(", ");
+
   const hasAqi = effectiveMetrics.includes("aqi");
   const leftAxisMetrics =
     effectiveMetrics.length === 0
@@ -206,6 +224,11 @@ export default function ChartsPage() {
         {!deviceId ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 text-sm text-slate-600 shadow-sm">
             No device selected. Choose a device to begin.
+          </div>
+        ) : null}
+        {devicesError || seriesError ? (
+          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            Some data failed to load ({errorSources}). Showing the most recent cached values.
           </div>
         ) : null}
         <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -290,6 +313,8 @@ export default function ChartsPage() {
             <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-500">
               Select a valid custom range to view data.
             </div>
+          ) : seriesLoading && chartData.length === 0 ? (
+            <div className="h-56 animate-pulse rounded-xl border border-slate-200 bg-slate-50" />
           ) : chartData.length === 0 ? (
             <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-500">
               No series data for this range.

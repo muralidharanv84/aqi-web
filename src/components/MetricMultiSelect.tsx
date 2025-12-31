@@ -36,7 +36,7 @@ export default function MetricMultiSelect({
           <button
             key={option.value}
             type="button"
-            className={`min-h-[44px] rounded-full px-4 text-sm transition ${
+            className={`min-h-[44px] rounded-full px-4 text-sm transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 ${
               active
                 ? "bg-slate-900 text-white"
                 : "border border-slate-200 bg-white text-slate-600 hover:bg-slate-100"

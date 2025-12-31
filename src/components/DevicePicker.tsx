@@ -15,7 +15,7 @@ export default function DevicePicker({
     <label className="flex items-center gap-2 text-sm">
       <span className="text-slate-500">Device</span>
       <select
-        className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none"
+        className="min-h-[44px] rounded-lg border border-slate-300 bg-white px-3 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
         value={value}
         onChange={(event) => onChange(event.target.value)}
       >
