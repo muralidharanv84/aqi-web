@@ -39,12 +39,12 @@ Deliverables:
 ## Phase 2 — Charts Page Foundations
 1. Define chart page layout:
    - Header area (title + device context)
-   - Control panel (metric, range, resolution)
+   - Control panel (metric, range)
    - Chart canvas
 2. Create control components:
    - Metric selector (multi-select)
    - Time range selector (1h, 24h, 7d, 30d, custom)
-   - Resolution selector (raw / 1h)
+   - Resolution handled automatically (raw under 24h, otherwise 1h)
 3. Define chart-ready data shape:
    - Normalize series points per metric
    - Combine into a shared time axis

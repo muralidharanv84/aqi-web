@@ -106,7 +106,7 @@ Query params:
 - metric
 - from (epoch seconds)
 - to (epoch seconds)
-- resolution = raw | 1h
+- resolution = raw | 1h (chosen automatically by the frontend)
 
 Notes:
 - Metric name for AQI is `aqi_us`.
@@ -219,9 +219,7 @@ Mobile notes:
   - 7d (default)
   - 30d
   - Custom
-- Resolution selector:
-  - Raw
-  - 1h
+- Resolution is chosen automatically by range (no user control).
 
 ---
 
@@ -295,6 +293,7 @@ Implementation detail:
 ### Resolution Selection
 - Use `raw` for ranges under 24 hours.
 - Use `1h` for ranges over 24 hours.
+- This is handled automatically by the frontend (no UI selector).
 - `raw` supports a maximum window of 14 days.
 - A future `24h` (daily) aggregation will be added for longer windows.
 
