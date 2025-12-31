@@ -1,4 +1,6 @@
 import { Navigate, Route, Routes as RouterRoutes } from "react-router-dom";
+import AboutPage from "../pages/AboutPage";
+import ChartsPage from "../pages/ChartsPage";
 import DashboardPage from "../pages/DashboardPage";
 
 export function Routes() {
@@ -6,6 +8,9 @@ export function Routes() {
     <RouterRoutes>
       <Route path="/" element={<Navigate to="/murali-1/" replace />} />
       <Route path="/:deviceId/" element={<DashboardPage />} />
+      <Route path="/:deviceId/charts" element={<ChartsPage />} />
+      <Route path="/:deviceId/about" element={<AboutPage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </RouterRoutes>
   );
 }

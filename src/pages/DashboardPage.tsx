@@ -133,6 +133,7 @@ export default function DashboardPage() {
 
   return (
     <AppShell
+      deviceId={deviceId}
       headerRight={
         devices.length > 0 && deviceId ? (
           <DevicePicker

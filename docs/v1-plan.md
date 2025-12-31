@@ -94,10 +94,9 @@ Deliverables:
 1. Offline banner:
    - Show when any query fails
    - Keep cached values visible
-2. Align polling interval with design doc (60s).
-3. Add device timezone hint (optional text in charts).
-4. Improve skeletons/loading states for charts controls.
-5. Add small accessibility pass:
+2. Add device timezone hint (optional text in charts).
+3. Improve skeletons/loading states for charts controls.
+4. Add small accessibility pass:
    - Focus states
    - Touch targets
    - Labels on controls
