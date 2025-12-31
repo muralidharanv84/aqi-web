@@ -6,7 +6,7 @@ export type AqiCategory = {
   max: number;
 };
 
-const AQI_CATEGORIES: AqiCategory[] = [
+export const AQI_CATEGORIES: AqiCategory[] = [
   {
     min: 0,
     max: 50,
