@@ -187,7 +187,6 @@ export default function ChartsPage() {
     })
     .join(", ");
 
-  const activeDevice = devices.find((device) => device.device_id === deviceId);
   const errorSources = [
     devicesError ? "devices" : null,
     seriesError ? "series" : null,
