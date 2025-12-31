@@ -10,6 +10,10 @@ export type NormalizedSeriesPoint = {
   n?: number;
 };
 
+export type MergedSeriesPoint = {
+  ts: number;
+} & Record<string, number | undefined>;
+
 const ONE_DAY_SECONDS = 24 * 60 * 60;
 
 export function chooseSeriesResolution(
@@ -85,4 +89,20 @@ export function normalizeSeriesPoints(
   }
 
   return { points, invalidCount };
+}
+
+export function mergeSeriesPoints(
+  seriesByMetric: Record<string, NormalizedSeriesPoint[]>
+): MergedSeriesPoint[] {
+  const merged = new Map<number, MergedSeriesPoint>();
+
+  Object.entries(seriesByMetric).forEach(([metricKey, points]) => {
+    points.forEach((point) => {
+      const entry = merged.get(point.ts) ?? { ts: point.ts };
+      entry[metricKey] = point.value;
+      merged.set(point.ts, entry);
+    });
+  });
+
+  return Array.from(merged.values()).sort((a, b) => a.ts - b.ts);
 }
