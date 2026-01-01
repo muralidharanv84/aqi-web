@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   CartesianGrid,
   Legend,
@@ -39,6 +39,12 @@ const METRIC_COLORS: Record<MetricKey, string> = {
 };
 
 const DEFAULT_RANGE = "7d";
+const RANGE_OPTIONS = ["1h", "24h", "7d", "30d", "1y", "all", "custom"] as const;
+const DEFAULT_METRICS: MetricKey[] = ["aqi"];
+
+function isMetricKey(value: string): value is MetricKey {
+  return METRICS.some((metric) => metric.key === value);
+}
 
 function formatDateTimeInput(value: Date) {
   const pad = (item: number) => item.toString().padStart(2, "0");
@@ -50,18 +56,85 @@ function formatDateTimeInput(value: Date) {
 export default function ChartsPage() {
   const navigate = useNavigate();
   const { deviceId } = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const lastSyncedParams = useRef<string | null>(null);
   const {
     data: devices = [],
     isError: devicesError,
   } = useDevices();
-  const [selectedMetrics, setSelectedMetrics] = useState<MetricKey[]>(["aqi"]);
+  const [selectedMetrics, setSelectedMetrics] =
+    useState<MetricKey[]>(DEFAULT_METRICS);
   const [rangePreset, setRangePreset] = useState(DEFAULT_RANGE);
   const [customFrom, setCustomFrom] = useState(() => {
     const now = new Date();
     const prior = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     return formatDateTimeInput(prior);
   });
-  const [customTo, setCustomTo] = useState(() => formatDateTimeInput(new Date()));
+  const [customTo, setCustomTo] = useState(() =>
+    formatDateTimeInput(new Date())
+  );
+
+  useEffect(() => {
+    const rangeParam = searchParams.get("range");
+    const metricsParam = searchParams.get("metrics");
+    const fromParam = searchParams.get("from");
+    const toParam = searchParams.get("to");
+
+    const parsedRange = RANGE_OPTIONS.includes(
+      rangeParam as (typeof RANGE_OPTIONS)[number]
+    )
+      ? rangeParam
+      : DEFAULT_RANGE;
+
+    const parsedMetrics = metricsParam
+      ? metricsParam
+          .split(",")
+          .map((item) => item.trim())
+          .filter((item) => item.length > 0)
+          .filter(isMetricKey)
+      : DEFAULT_METRICS;
+
+    const currentParams = searchParams.toString();
+    if (currentParams === lastSyncedParams.current) {
+      return;
+    }
+
+    setRangePreset(parsedRange);
+    setSelectedMetrics(parsedMetrics.length ? parsedMetrics : DEFAULT_METRICS);
+
+    if (parsedRange === "custom") {
+      if (fromParam) {
+        setCustomFrom(fromParam);
+      }
+      if (toParam) {
+        setCustomTo(toParam);
+      }
+    }
+  }, [searchParams]);
+
+  useEffect(() => {
+    const nextParams = new URLSearchParams();
+    nextParams.set("range", rangePreset);
+    if (selectedMetrics.length) {
+      nextParams.set("metrics", selectedMetrics.join(","));
+    } else {
+      nextParams.delete("metrics");
+    }
+    if (rangePreset === "custom") {
+      nextParams.set("from", customFrom);
+      nextParams.set("to", customTo);
+    } else {
+      nextParams.delete("from");
+      nextParams.delete("to");
+    }
+
+    const current = searchParams.toString();
+    const next = nextParams.toString();
+    if (current !== next) {
+      lastSyncedParams.current = next;
+      setSearchParams(nextParams, { replace: true });
+    }
+  }, [customFrom, customTo, rangePreset, searchParams, selectedMetrics, setSearchParams]);
 
   const { from, to, rangeLabel, isCustomInvalid } = useMemo(() => {
     const end = Math.floor(Date.now() / 1000);
