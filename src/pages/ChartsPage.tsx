@@ -99,7 +99,7 @@ export default function ChartsPage() {
       return;
     }
 
-    setRangePreset(parsedRange);
+    setRangePreset(parsedRange ?? DEFAULT_RANGE);
     setSelectedMetrics(parsedMetrics.length ? parsedMetrics : DEFAULT_METRICS);
 
     if (parsedRange === "custom") {
