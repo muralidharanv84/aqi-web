@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   CartesianGrid,
@@ -22,6 +22,7 @@ import {
   METRICS,
 } from "../domain/metrics";
 import type { MetricKey } from "../domain/metrics";
+import { getAqiCategoryForValue } from "../domain/aqi";
 import { mergeSeriesPoints } from "../domain/series";
 import type { NormalizedSeriesPoint } from "../domain/series";
 import { formatDateTimeMs } from "../domain/time";
@@ -30,12 +31,12 @@ import { useMultiSeries } from "../query/series";
 
 const METRIC_COLORS: Record<MetricKey, string> = {
   aqi: "#0f172a",
-  pm25: "#f97316",
-  co2: "#2563eb",
-  voc_index: "#10b981",
-  voc_ppm: "#14b8a6",
-  temperature_c: "#ef4444",
-  humidity: "#6366f1",
+  pm25: "#0ea5e9",
+  co2: "#1d4ed8",
+  voc_index: "#14b8a6",
+  voc_ppm: "#06b6d4",
+  temperature_c: "#64748b",
+  humidity: "#4f46e5",
 };
 
 const DEFAULT_RANGE = "7d";
@@ -223,6 +224,29 @@ export default function ChartsPage() {
     [seriesByMetricKey]
   );
 
+  const aqiGradientId = useId();
+  const aqiGradientStops = useMemo(() => {
+    if (!effectiveMetrics.includes("aqi")) {
+      return [];
+    }
+    const points = seriesByMetricKey.aqi ?? [];
+    if (points.length < 2) {
+      return [];
+    }
+    return points
+      .filter(
+        (point) => Number.isFinite(point.ts) && Number.isFinite(point.value)
+      )
+      .map((point, index, safePoints) => {
+        const offset =
+          safePoints.length === 1 ? 0 : (index / (safePoints.length - 1)) * 100;
+        return {
+          offset,
+          color: getAqiCategoryForValue(point.value).color,
+        };
+      });
+  }, [effectiveMetrics, seriesByMetricKey.aqi]);
+
   const chartData = useMemo(
     () =>
       mergedSeries.map((point) => ({
@@ -282,6 +306,10 @@ export default function ChartsPage() {
     effectiveMetrics.length === 0
       ? ([] as MetricKey[])
       : effectiveMetrics.filter((metric) => !leftAxisMetrics.includes(metric));
+  const aqiStroke =
+    aqiGradientStops.length > 0
+      ? `url(#aqi-line-${aqiGradientId})`
+      : METRIC_COLORS.aqi;
 
   return (
     <AppShell
@@ -400,6 +428,25 @@ export default function ChartsPage() {
             <div className="h-72 w-full">
               <ResponsiveContainer>
                 <LineChart data={chartData} margin={{ top: 8, right: 24, left: 0, bottom: 0 }}>
+                  {aqiGradientStops.length > 0 ? (
+                    <defs>
+                      <linearGradient
+                        id={`aqi-line-${aqiGradientId}`}
+                        x1="0"
+                        y1="0"
+                        x2="1"
+                        y2="0"
+                      >
+                        {aqiGradientStops.map((stop) => (
+                          <stop
+                            key={`aqi-line-stop-${stop.offset}`}
+                            offset={`${stop.offset}%`}
+                            stopColor={stop.color}
+                          />
+                        ))}
+                      </linearGradient>
+                    </defs>
+                  ) : null}
                   <CartesianGrid stroke="#e2e8f0" strokeDasharray="4 4" />
                   <XAxis
                     dataKey="ts"
@@ -447,7 +494,9 @@ export default function ChartsPage() {
                       yAxisId={
                         leftAxisMetrics.includes(metricKey) ? "left" : "right"
                       }
-                      stroke={METRIC_COLORS[metricKey]}
+                      stroke={
+                        metricKey === "aqi" ? aqiStroke : METRIC_COLORS[metricKey]
+                      }
                       strokeWidth={2}
                       dot={false}
                       isAnimationActive={false}
