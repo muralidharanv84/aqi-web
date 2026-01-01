@@ -135,7 +135,7 @@ export default function DashboardPage() {
     <AppShell
       deviceId={deviceId}
       headerRight={
-        devices.length > 0 && deviceId ? (
+        devices.length > 1 && deviceId ? (
           <DevicePicker
             devices={devices}
             value={deviceId}
