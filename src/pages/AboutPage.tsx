@@ -1,36 +1,13 @@
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import AppShell from "../components/AppShell";
-import DevicePicker from "../components/DevicePicker";
 import { AQI_CATEGORIES } from "../domain/aqi";
-import { useDevices } from "../query/devices";
 
 export default function AboutPage() {
-  const navigate = useNavigate();
   const { deviceId } = useParams();
-  const {
-    data: devices = [],
-    isError: devicesError,
-  } = useDevices();
 
   return (
-    <AppShell
-      deviceId={deviceId}
-      headerRight={
-        devices.length > 0 && deviceId ? (
-          <DevicePicker
-            devices={devices}
-            value={deviceId}
-            onChange={(nextId) => navigate(`/${nextId}/about`)}
-          />
-        ) : null
-      }
-    >
+    <AppShell deviceId={deviceId}>
       <div className="space-y-6">
-        {devicesError ? (
-          <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            Some data failed to load (devices). Showing the most recent cached values.
-          </div>
-        ) : null}
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
           <div className="space-y-6">
             <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
