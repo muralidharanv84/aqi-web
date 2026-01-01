@@ -101,7 +101,12 @@ export function getMetricStatus(
 
 export function formatMetricValue(key: MetricKey, value: number): string {
   const definition = getMetricDefinition(key);
-  const rounded = Number.isInteger(value) ? value.toString() : value.toFixed(1);
+  const rounded =
+    key === "voc_ppm"
+      ? value.toFixed(3)
+      : Number.isInteger(value)
+        ? value.toString()
+        : value.toFixed(1);
   return definition.unit ? `${rounded} ${definition.unit}` : rounded;
 }
 

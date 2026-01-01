@@ -38,6 +38,8 @@ function Sparkline({
   metricKey,
   seriesSignature,
 }: SparklineProps) {
+  const formatSparkValue = (value: number) =>
+    metricKey === "voc_ppm" ? value.toFixed(3) : value.toFixed(1);
   const safePoints = useMemo(() => {
     return points.filter(
       (point) => Number.isFinite(point.value) && Number.isFinite(point.ts)
@@ -166,7 +168,7 @@ function Sparkline({
                   axisLine={false}
                   tickLine={false}
                   width={40}
-                  tickFormatter={(value) => (value as number).toFixed(1)}
+                  tickFormatter={(value) => formatSparkValue(value as number)}
                 />
                 <ReferenceLine y={0} stroke="#e2e8f0" />
                 <Tooltip
@@ -203,7 +205,7 @@ function Sparkline({
       </div>
       <div className="mt-2 text-xs text-slate-500">
         {safePoints.length
-          ? `Range: ${minValue.toFixed(1)}-${maxValue.toFixed(1)}`
+          ? `Range: ${formatSparkValue(minValue)}-${formatSparkValue(maxValue)}`
           : "No data"}
       </div>
     </section>
@@ -228,6 +230,8 @@ function SparklineTooltip({
   metricLabel: string;
   metricKey: MetricKey;
 }) {
+  const formatSparkValue = (value: number) =>
+    metricKey === "voc_ppm" ? value.toFixed(3) : value.toFixed(1);
   if (!active || !payload || payload.length === 0) {
     return null;
   }
@@ -251,7 +255,7 @@ function SparklineTooltip({
         <div className="text-lg font-semibold text-slate-900">
           {metricKey === "aqi"
             ? Math.round(data.value).toString()
-            : data.value.toFixed(1)}
+            : formatSparkValue(data.value)}
         </div>
         {data.status ? (
           <span
@@ -267,7 +271,8 @@ function SparklineTooltip({
       </div>
       {Number.isFinite(data.min) && Number.isFinite(data.max) ? (
         <div className="mt-1 text-slate-500">
-          Min/Max: {data.min?.toFixed(1)} / {data.max?.toFixed(1)}
+          Min/Max: {formatSparkValue(data.min as number)} /{" "}
+          {formatSparkValue(data.max as number)}
         </div>
       ) : null}
       {Number.isFinite(data.n) ? (
