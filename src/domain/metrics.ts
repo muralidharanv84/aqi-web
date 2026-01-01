@@ -55,10 +55,11 @@ const CO2_SCALE: MetricScale[] = [
 ];
 
 const VOC_INDEX_SCALE: MetricScale[] = [
-  { max: 100, label: "Good", color: "#22c55e" },
-  { max: 200, label: "Moderate", color: "#facc15" },
-  { max: 300, label: "Poor", color: "#f97316" },
-  { max: Number.POSITIVE_INFINITY, label: "Very Poor", color: "#ef4444" },
+  { max: 150, label: "Normal", color: "#22c55e" },
+  { max: 175, label: "Elevated", color: "#facc15" },
+  { max: 210, label: "High", color: "#f97316" },
+  { max: 335, label: "Very High", color: "#ef4444" },
+  { max: Number.POSITIVE_INFINITY, label: "Severe", color: "#7f1d1d" },
 ];
 
 const VOC_PPM_SCALE: MetricScale[] = [
