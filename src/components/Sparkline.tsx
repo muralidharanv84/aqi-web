@@ -70,21 +70,29 @@ function Sparkline({
   }, [seriesSignature]);
 
   const gradientId = useId();
+  const { minTs, maxTs } = useMemo(() => {
+    if (chartData.length === 0) {
+      return { minTs: 0, maxTs: 0 };
+    }
+    const timestamps = chartData.map((point) => point.ts);
+    return {
+      minTs: Math.min(...timestamps),
+      maxTs: Math.max(...timestamps),
+    };
+  }, [chartData]);
   const gradientStops = useMemo(() => {
     if (chartData.length < 2) {
       return [];
     }
-    return chartData.map((point, index) => {
-      const offset =
-        chartData.length === 1
-          ? 0
-          : (index / (chartData.length - 1)) * 100;
+    const range = maxTs - minTs;
+    return chartData.map((point) => {
+      const offset = range > 0 ? ((point.ts - minTs) / range) * 100 : 0;
       return {
         offset,
         color: point.status?.color ?? "#0f172a",
       };
     });
-  }, [chartData]);
+  }, [chartData, maxTs, minTs]);
 
   const { maxValue, minValue } = useMemo(() => {
     if (safePoints.length === 0) {

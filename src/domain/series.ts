@@ -88,6 +88,8 @@ export function normalizeSeriesPoints(
     });
   }
 
+  points.sort((a, b) => a.ts - b.ts);
+
   return { points, invalidCount };
 }
 
