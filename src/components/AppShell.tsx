@@ -25,7 +25,17 @@ export default function AppShell({
       <header className="border-b border-slate-200 bg-white">
         <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
-            <div className="text-lg font-semibold tracking-tight">Home AQI</div>
+            <div className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-900">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50">
+                <img
+                  src="/web-app-manifest-192x192.png"
+                  alt="Home AQI logo"
+                  className="h-6 w-6"
+                  loading="lazy"
+                />
+              </span>
+              <span>Home AQI</span>
+            </div>
             {navLinks.length ? (
               <nav className="flex flex-wrap gap-2 text-sm text-slate-600">
                 {navLinks.map((link) => (
