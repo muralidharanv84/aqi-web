@@ -69,7 +69,7 @@ export default function AboutPage() {
                 Indoor CO2
               </div>
               <div className="text-2xl font-semibold text-slate-900">
-                Air purifiers help particles, but not CO2
+                Air purifiers help with particles, but not CO2
               </div>
               <div className="space-y-3 text-sm text-slate-600">
                 <p>
