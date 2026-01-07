@@ -18,8 +18,14 @@ export default function AboutPage() {
                 Understanding air quality
               </div>
               <div className="text-sm text-slate-600">
-                The Air Quality Index (AQI) summarizes multiple pollutants into a
-                single, easy-to-read number. Higher values mean worse air quality.
+                Our AQI here is calculated primarily from PM2.5 because it is the
+                dominant pollutant in urban India. PM2.5 is especially harmful
+                because the particles are small enough to penetrate deep into the
+                lungs and enter the bloodstream, increasing risks to respiratory
+                and cardiovascular health.
+                <br />
+                Typical sources include vehicle exhaust, road dust, construction,
+                industrial emissions, and the burning of biomass and waste.
               </div>
               <a
                 className="inline-flex min-h-[44px] items-center rounded-full border border-slate-200 px-4 text-sm text-slate-700 transition hover:bg-slate-100"
@@ -52,6 +58,63 @@ export default function AboutPage() {
                     </div>
                     <div className="mt-2 text-sm text-slate-600">
                       {category.description}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="space-y-3 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="text-sm font-medium uppercase tracking-wide text-slate-500">
+                Indoor CO2
+              </div>
+              <div className="text-2xl font-semibold text-slate-900">
+                Air purifiers help particles, but not CO2
+              </div>
+              <div className="space-y-3 text-sm text-slate-600">
+                <p>
+                  Air purifiers are the right tool for particulate matter, and they work best
+                  when a room is closed. The catch is that a closed room with people inside
+                  steadily accumulates CO2 from breathing.
+                </p>
+                <p>
+                  Rising CO2 can make spaces feel stuffy and can affect alertness, focus, and
+                  decision making. Ventilation or fresh-air exchange is what brings CO2 down.
+                </p>
+                <p>
+                  For context, outdoor CO2 today is typically around 420 ppm, so values much
+                  above that indoors signal poor air exchange.
+                </p>
+              </div>
+            </section>
+
+            <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="text-sm font-medium uppercase tracking-wide text-slate-500">
+                CO2 scale (ppm)
+              </div>
+              <div className="grid gap-3 md:grid-cols-2">
+                {[
+                  { label: "Fresh", min: 0, max: 800, color: "#22c55e" },
+                  { label: "Fair", min: 801, max: 1000, color: "#facc15" },
+                  { label: "Poor", min: 1001, max: 1500, color: "#f97316" },
+                  { label: "Very Poor", min: 1501, max: 2000, color: "#ef4444" },
+                  { label: "Severe", min: 2001, max: "∞", color: "#7f1d1d" },
+                ].map((level) => (
+                  <div
+                    key={level.label}
+                    className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                    style={{ borderLeft: `6px solid ${level.color}` }}
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div className="text-base font-semibold text-slate-900">
+                        {level.label}
+                      </div>
+                      <div className="text-xs font-medium uppercase tracking-wide text-slate-500">
+                        {level.min}–{level.max}
+                      </div>
+                    </div>
+                    <div className="mt-2 text-sm text-slate-600">
+                      {level.label} indoor CO2
                     </div>
                   </div>
                 ))}
