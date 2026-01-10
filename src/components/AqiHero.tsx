@@ -15,15 +15,17 @@ export default function AqiHero({
   lastUpdated,
   stale,
 }: AqiHeroProps) {
+  const isStale = Boolean(stale);
   const background = category?.color ?? "#e2e8f0";
+  const accent = isStale ? "#f59e0b" : background;
   const tint = `${background}33`;
 
   return (
     <section
       className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
       style={{
-        boxShadow: `0 0 0 2px ${background}55`,
-        borderColor: `${background}80`,
+        boxShadow: `0 0 0 2px ${accent}55`,
+        borderColor: `${accent}80`,
       }}
     >
       <div
@@ -35,6 +37,11 @@ export default function AqiHero({
         <div className="text-sm font-medium uppercase tracking-wide text-slate-500">
           Current AQI
         </div>
+        {isStale ? (
+          <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold uppercase tracking-wide text-amber-700">
+            Stale data
+          </div>
+        ) : null}
         <div className="mt-2 text-5xl font-semibold leading-none text-slate-900 sm:text-6xl">
           {aqi ?? "--"}
         </div>
@@ -44,9 +51,13 @@ export default function AqiHero({
         <div className="mt-1 text-sm text-slate-600">
           {description ?? category?.description ?? ""}
         </div>
+        {isStale ? (
+          <div className="mt-3 text-sm font-medium text-amber-800">
+            Device offline. Showing the last known reading.
+          </div>
+        ) : null}
         <div className="mt-4 text-xs text-slate-500">
           Last updated: {lastUpdated ?? "--"}
-          {stale ? " (stale)" : ""}
         </div>
       </div>
     </section>
