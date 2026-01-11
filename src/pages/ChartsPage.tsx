@@ -230,21 +230,24 @@ export default function ChartsPage() {
       return [];
     }
     const points = seriesByMetricKey.aqi ?? [];
-    if (points.length < 2) {
+    const safePoints = points.filter(
+      (point) => Number.isFinite(point.ts) && Number.isFinite(point.value)
+    );
+    if (safePoints.length < 2) {
       return [];
     }
-    return points
-      .filter(
-        (point) => Number.isFinite(point.ts) && Number.isFinite(point.value)
-      )
-      .map((point, index, safePoints) => {
-        const offset =
-          safePoints.length === 1 ? 0 : (index / (safePoints.length - 1)) * 100;
-        return {
-          offset,
-          color: getAqiCategoryForValue(point.value).color,
-        };
-      });
+    const sortedPoints = [...safePoints].sort((a, b) => a.ts - b.ts);
+    const timestamps = sortedPoints.map((point) => point.ts);
+    const minTs = Math.min(...timestamps);
+    const maxTs = Math.max(...timestamps);
+    const range = maxTs - minTs;
+    return sortedPoints.map((point) => {
+      const offset = range > 0 ? ((point.ts - minTs) / range) * 100 : 0;
+      return {
+        offset,
+        color: getAqiCategoryForValue(point.value).color,
+      };
+    });
   }, [effectiveMetrics, seriesByMetricKey.aqi]);
 
   const chartData = useMemo(
