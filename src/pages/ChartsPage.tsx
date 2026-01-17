@@ -40,7 +40,17 @@ const METRIC_COLORS: Record<MetricKey, string> = {
 };
 
 const DEFAULT_RANGE = "7d";
-const RANGE_OPTIONS = ["1h", "4h", "24h", "7d", "30d", "1y", "all", "custom"] as const;
+const RANGE_OPTIONS = [
+  "1h",
+  "4h",
+  "12h",
+  "24h",
+  "7d",
+  "30d",
+  "1y",
+  "all",
+  "custom",
+] as const;
 const DEFAULT_METRICS: MetricKey[] = ["aqi"];
 
 function isMetricKey(value: string): value is MetricKey {
@@ -162,6 +172,10 @@ export default function ChartsPage() {
       case "4h":
         rangeSeconds = 4 * 60 * 60;
         label = "4h";
+        break;
+      case "12h":
+        rangeSeconds = 12 * 60 * 60;
+        label = "12h";
         break;
       case "24h":
         rangeSeconds = 24 * 60 * 60;
@@ -369,6 +383,7 @@ export default function ChartsPage() {
                 options={[
                   { label: "1h", value: "1h" },
                   { label: "4h", value: "4h" },
+                  { label: "12h", value: "12h" },
                   { label: "24h", value: "24h" },
                   { label: "7d", value: "7d" },
                   { label: "30d", value: "30d" },
