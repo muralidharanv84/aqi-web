@@ -5,6 +5,7 @@ import AqiHero from "../components/AqiHero";
 import DevicePicker from "../components/DevicePicker";
 import MetricCards from "../components/MetricCards";
 import MetricSegmentedControl from "../components/MetricSegmentedControl";
+import PurifierControlPanel from "../components/PurifierControlPanel";
 import Sparkline from "../components/Sparkline";
 import { getAqiCategoryForValue } from "../domain/aqi";
 import {
@@ -167,6 +168,7 @@ export default function DashboardPage() {
           lastUpdated={lastUpdated}
           stale={latest?.stale}
         />
+        <PurifierControlPanel fanControl={latest?.fan_control ?? null} />
         {isLoading && cards.length === 0 ? (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
