@@ -14,7 +14,7 @@ describe("PurifierControlPanel", () => {
     expect(html).toContain("Target purifier IDs");
   });
 
-  it("renders latest success event details", () => {
+  it("renders latest success event details and hides historical errors", () => {
     const runTs = 1_704_067_200;
     const html = renderToStaticMarkup(
       <PurifierControlPanel
@@ -26,7 +26,12 @@ describe("PurifierControlPanel", () => {
             speed: "medium",
             error_message: null,
           },
-          latest_error: null,
+          latest_error: {
+            run_ts: runTs - 60,
+            status: "error",
+            message: "Older control error",
+            error_streak: 2,
+          },
         }}
       />,
     );
@@ -35,6 +40,8 @@ describe("PurifierControlPanel", () => {
     expect(html).toContain("medium");
     expect(html).toContain("purifier-a, purifier-b");
     expect(html).not.toContain("No control run has been recorded yet.");
+    expect(html).not.toContain("Older control error");
+    expect(html).not.toContain("Error streak:");
   });
 
   it("renders latest error state prominently when present", () => {
@@ -42,7 +49,13 @@ describe("PurifierControlPanel", () => {
     const html = renderToStaticMarkup(
       <PurifierControlPanel
         fanControl={{
-          latest_event: null,
+          latest_event: {
+            run_ts: runTs,
+            status: "error",
+            purifier_device_ids: ["purifier-a"],
+            speed: null,
+            error_message: "Failed to call purifier API",
+          },
           latest_error: {
             run_ts: runTs,
             status: "error",
