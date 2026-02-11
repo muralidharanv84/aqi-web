@@ -10,7 +10,7 @@
 
 ### Pages & Routing
 - `DashboardPage`
-  - Route: `/:deviceId/` with default redirect `/` → `/murali-1/`
+  - Route: `/:deviceId/` with default redirect `/` → `/murali-living-room/`
   - Responsibilities: fetch device list, latest readings, sparkline series; manage selected device and selected sparkline metric; compose layout.
 
 ### Data/Domain

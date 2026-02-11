@@ -25,7 +25,7 @@ Deliverable: Updated checklist in `docs/validation.md` for new pages.
    - Charts
    - About
 3. Ensure device picker stays in header across pages.
-4. Preserve redirect from `/` → `/murali-1/`.
+4. Preserve redirect from `/` → `/murali-living-room/`.
 5. Add a 404/fallback route to redirect to dashboard.
 
 Deliverables:

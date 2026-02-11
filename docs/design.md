@@ -47,7 +47,7 @@ No login. No editing. Read-only and fast.
 
 - Device-scoped routing:
   ```
-  /                  → redirect to /murali-1/
+  /                  → redirect to /murali-living-room/
   /:deviceId/        → dashboard
   /:deviceId/charts  → advanced charts
   /:deviceId/about   → AQI explanation
@@ -56,7 +56,7 @@ No login. No editing. Read-only and fast.
 If no device is explicitly selected, the default device is:
 
 ```
-murali-1
+murali-living-room
 ```
 
 ---

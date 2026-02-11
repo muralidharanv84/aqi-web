@@ -35,7 +35,7 @@ Sensors/device firmware (airqualitymonitor)
 
 ## App Routes
 
-- `/` -> redirects to `/murali-1/`
+- `/` -> redirects to `/murali-living-room/`
 - `/:deviceId/` -> Dashboard
 - `/:deviceId/charts` -> Advanced charts
 - `/:deviceId/about` -> AQI explainer/about

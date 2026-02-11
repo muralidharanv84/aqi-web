@@ -6,7 +6,10 @@ import DashboardPage from "../pages/DashboardPage";
 export function Routes() {
   return (
     <RouterRoutes>
-      <Route path="/" element={<Navigate to="/murali-1/" replace />} />
+      <Route
+        path="/"
+        element={<Navigate to="/murali-living-room/" replace />}
+      />
       <Route path="/:deviceId/" element={<DashboardPage />} />
       <Route path="/:deviceId/charts" element={<ChartsPage />} />
       <Route path="/:deviceId/about" element={<AboutPage />} />
