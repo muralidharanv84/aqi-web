@@ -36,6 +36,24 @@ function renderMonitor(location: string, metrics?: Record<string, number | null>
 }
 
 describe("metric availability on dashboard and charts", () => {
+  it.each([undefined, { aqi_us: 50, pm25_ugm3: 12 }])(
+    "hides outdoor purifier controls regardless of loading state (%j)", (metrics) => {
+      const { html } = renderMonitor("/bellezea-outdoor/", metrics);
+      expect(html).not.toContain("Purifier Control");
+      expect(html).not.toContain("Last control run");
+    }
+  );
+
+  it.each(["murali-living-room", "murali-1"])(
+    "preserves purifier controls below metrics for %s", (deviceId) => {
+      const { html } = renderMonitor(`/${deviceId}/`, { co2_ppm: 545 });
+      expect(html).toContain("Purifier Control");
+      expect(html.indexOf("545 ppm")).toBeGreaterThan(-1);
+      expect(html.indexOf("545 ppm")).toBeLessThan(html.indexOf("Purifier Control"));
+      expect(renderMonitor(`/${deviceId}/`).html).toContain("Purifier Control");
+    }
+  );
+
   it.each([
     ["1h", "raw", "Individual readings"], ["4h", "raw", "Individual readings"],
     ["12h", "5m", "5-minute averages"], ["24h", "5m", "5-minute averages"],

@@ -190,7 +190,9 @@ export default function DashboardPage() {
         ) : (
           <MetricCards metrics={cards} />
         )}
-        <PurifierControlPanel fanControl={latest?.fan_control ?? null} />
+        {deviceId !== "bellezea-outdoor" ? (
+          <PurifierControlPanel fanControl={latest?.fan_control ?? null} />
+        ) : null}
         {sparkMetric ? (
           <MetricSegmentedControl
             value={sparkMetric}
