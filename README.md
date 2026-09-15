@@ -88,7 +88,7 @@ The same thresholds apply to custom ranges. The backend enforces a maximum 14-da
 - Unsupported chart selections in saved links or after switching monitors fall back to the first available metric; valid selections and the time range are preserved
 - Charts identify the averaging interval and use compact date labels at wider ranges
 - Compare defaults to living room versus outdoor AQI over 24 hours. The URL saves both monitors, the shared metric, and the range
-- Comparison uses one scale and the same averaging interval for both monitors. All time aligns differing monitor histories to the coarser interval. Missing readings remain absent; lines connect recorded points, and tooltips identify missing values
+- Comparison uses one scale and the same averaging interval for both monitors. All time aligns differing monitor histories to the coarser interval. Lines connect recorded points; tooltips show each monitor's closest reading within the selected range and identify its actual timestamp or period when it differs from the selected time
 - Series points are normalized from multiple backend point shapes (`value`, `v`, `avg`, etc.)
 - Invalid series points are dropped; UI surfaces a warning with invalid-point counts
 - Time display uses browser locale formatting via `Intl.DateTimeFormat` (configured `en-GB`, 24h)

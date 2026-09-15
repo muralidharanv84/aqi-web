@@ -22,6 +22,22 @@ export function coarsestResolution(resolutions: SeriesResolution[]): SeriesResol
   return ordered[Math.max(...resolutions.map((resolution) => ordered.indexOf(resolution)))];
 }
 
+// Normalized series are sorted by timestamp. Prefer the earlier reading on a tie.
+export function findClosestReading(points: NormalizedSeriesPoint[], timestampSeconds: number) {
+  let low = 0;
+  let high = points.length;
+  while (low < high) {
+    const middle = Math.floor((low + high) / 2);
+    if (points[middle].ts < timestampSeconds) low = middle + 1;
+    else high = middle;
+  }
+  const before = points[low - 1];
+  const after = points[low];
+  if (!before) return after;
+  if (!after) return before;
+  return timestampSeconds - before.ts <= after.ts - timestampSeconds ? before : after;
+}
+
 export function mergeComparisonSeries(first: NormalizedSeriesPoint[], second: NormalizedSeriesPoint[]) {
   const rows = new Map<number, { ts: number; first?: number; second?: number }>();
   for (const [key, points] of [["first", first], ["second", second]] as const) {
