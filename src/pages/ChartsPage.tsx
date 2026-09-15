@@ -24,9 +24,9 @@ import {
 } from "../domain/metrics";
 import type { MetricKey } from "../domain/metrics";
 import { getAqiCategoryForValue } from "../domain/aqi";
-import { mergeSeriesPoints } from "../domain/series";
-import type { NormalizedSeriesPoint } from "../domain/series";
-import { formatDateTimeMs } from "../domain/time";
+import { mergeSeriesPoints, RESOLUTION_LABELS } from "../domain/series";
+import type { NormalizedSeriesPoint, SeriesResolution } from "../domain/series";
+import { formatChartPeriod, formatChartTick, isCalendarResolution } from "../domain/time";
 import { useDevices } from "../query/devices";
 import { useLatest } from "../query/latest";
 import { useMultiSeries } from "../query/series";
@@ -425,7 +425,9 @@ export default function ChartsPage() {
         </section>
         <section className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-2 text-sm text-slate-500">
-            <div>Trend view</div>
+            <div>
+              {RESOLUTION_LABELS[resolution]}{isCalendarResolution(resolution) ? " · UTC" : ""}
+            </div>
             <div>Range: {rangeLabel}</div>
           </div>
           {isCustomInvalid ? (
@@ -467,11 +469,12 @@ export default function ChartsPage() {
                     type="number"
                     scale="time"
                     domain={["dataMin", "dataMax"]}
-                    tickFormatter={(value) => formatDateTimeMs(value as number)}
+                    tickFormatter={(value) => formatChartTick(value as number, resolution)}
                     tick={{ fill: "#94a3b8", fontSize: 11 }}
                     axisLine={false}
                     tickLine={false}
-                    minTickGap={24}
+                    minTickGap={40}
+                    tickCount={6}
                   />
                   <YAxis
                     yAxisId="left"
@@ -542,7 +545,7 @@ function ChartTooltip({
 }: TooltipProps<number, string> & {
   selectedMetrics: MetricKey[];
   seriesPointLookup: Record<MetricKey, Map<number, NormalizedSeriesPoint>>;
-  resolution: "raw" | "1h";
+  resolution: SeriesResolution;
 }) {
   if (!active || !payload || payload.length === 0 || typeof label !== "number") {
     return null;
@@ -552,8 +555,11 @@ function ChartTooltip({
   return (
     <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs text-slate-700 shadow-lg">
       <div className="text-[11px] uppercase tracking-wide text-slate-400">
-        {formatDateTimeMs(label)}
+        {formatChartPeriod(label, resolution)}
       </div>
+      {resolution !== "raw" ? (
+        <div className="mt-1 text-slate-500">{RESOLUTION_LABELS[resolution]}</div>
+      ) : null}
       <div className="mt-2 space-y-1">
         {selectedMetrics.map((metricKey) => {
           const point = seriesPointLookup[metricKey]?.get(timestampSeconds);
@@ -578,7 +584,7 @@ function ChartTooltip({
           );
         })}
       </div>
-      {resolution === "1h" ? (
+      {resolution !== "raw" ? (
         <div className="mt-2 space-y-1 text-[11px] text-slate-500">
           {selectedMetrics.map((metricKey) => {
             const point = seriesPointLookup[metricKey]?.get(timestampSeconds);
@@ -590,7 +596,7 @@ function ChartTooltip({
                 {getMetricDefinition(metricKey).label}: min{" "}
                 {formatMetricValue(metricKey, point.min as number)} / max{" "}
                 {formatMetricValue(metricKey, point.max as number)}
-                {Number.isFinite(point.n) ? ` · n=${point.n}` : ""}
+                {Number.isFinite(point.n) ? ` · ${point.n} readings` : ""}
               </div>
             );
           })}

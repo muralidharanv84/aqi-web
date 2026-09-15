@@ -1,6 +1,20 @@
 import type { SeriesPoint, SeriesResponse } from "../api/types";
 
-export type SeriesResolution = "raw" | "1h";
+export type SeriesResolution = "raw" | "5m" | "1h" | "1d" | "1w" | "1mo";
+export type SeriesResolutionRequest = SeriesResolution | "auto";
+
+export const RESOLUTION_LABELS: Record<SeriesResolution, string> = {
+  raw: "Individual readings",
+  "5m": "5-minute averages",
+  "1h": "Hourly averages",
+  "1d": "Daily averages",
+  "1w": "Weekly averages",
+  "1mo": "Monthly averages",
+};
+
+export function isSeriesResolution(value: unknown): value is SeriesResolution {
+  return typeof value === "string" && Object.prototype.hasOwnProperty.call(RESOLUTION_LABELS, value);
+}
 
 export type NormalizedSeriesPoint = {
   ts: number;
@@ -20,7 +34,13 @@ export function chooseSeriesResolution(
   from: number,
   to: number
 ): SeriesResolution {
-  return to - from <= ONE_DAY_SECONDS ? "raw" : "1h";
+  const range = to - from;
+  if (range <= 4 * 60 * 60) return "raw";
+  if (range <= ONE_DAY_SECONDS) return "5m";
+  if (range <= 14 * ONE_DAY_SECONDS) return "1h";
+  if (range <= 90 * ONE_DAY_SECONDS) return "1d";
+  if (range <= 730 * ONE_DAY_SECONDS) return "1w";
+  return "1mo";
 }
 
 function resolvePointValue(point: SeriesPoint, metricKey: string) {
@@ -61,10 +81,12 @@ export function normalizeSeriesPoints(
   metricKey: string
 ) {
   let rawPoints: SeriesPoint[] = [];
+  let resolution: SeriesResolution | undefined;
   if (Array.isArray(response)) {
     rawPoints = response;
   } else if (response && typeof response === "object") {
     const typed = response as SeriesResponse;
+    resolution = isSeriesResolution(typed.resolution) ? typed.resolution : undefined;
     rawPoints =
       typed.points ?? typed.data ?? typed.series ?? ([] as SeriesPoint[]);
   }
@@ -90,7 +112,7 @@ export function normalizeSeriesPoints(
 
   points.sort((a, b) => a.ts - b.ts);
 
-  return { points, invalidCount };
+  return { points, invalidCount, resolution };
 }
 
 export function mergeSeriesPoints(

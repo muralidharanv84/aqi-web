@@ -64,10 +64,15 @@ Supported metric API keys expected by the frontend:
 
 Series resolution strategy in the frontend:
 
-- `raw` when range is `<= 24h`
-- `1h` when range is `> 24h`
+- `raw` through 4 hours
+- `5m` through 24 hours
+- `1h` through 14 days
+- `1d` through 90 days
+- `1w` through 2 years
+- `1mo` beyond 2 years
+- All time requests `auto`; the backend chooses hourly, daily, weekly, or monthly averages from the device's actual recorded history
 
-Note: backend enforces a max `raw` range of 14 days.
+The same thresholds apply to custom ranges. The backend enforces a maximum 14-day range for raw and five-minute requests. Calendar summaries use UTC days, Monday-starting weeks, and calendar months. Averages are weighted by the stored hourly sample counts, and preserve min/max values in tooltips. Boundary periods include only readings inside the selected range.
 
 ## UI/Data Behavior (Current Implementation)
 
@@ -78,6 +83,7 @@ Note: backend enforces a max `raw` range of 14 days.
 - VOC and VOC Index are hidden for `murali-1`, including its archived readings
 - Noise readings are shown in **dB**, including on the `bellezea-outdoor` dashboard and charts
 - Unsupported chart selections in saved links or after switching monitors fall back to the first available metric; valid selections and the time range are preserved
+- Charts identify the averaging interval and use compact date labels at wider ranges
 - Series points are normalized from multiple backend point shapes (`value`, `v`, `avg`, etc.)
 - Invalid series points are dropped; UI surfaces a warning with invalid-point counts
 - Time display uses browser locale formatting via `Intl.DateTimeFormat` (configured `en-GB`, 24h)

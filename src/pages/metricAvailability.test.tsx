@@ -28,11 +28,29 @@ function renderMonitor(location: string, metrics?: Record<string, number | null>
   const seriesMetrics = client.getQueryCache().getAll()
     .filter((query) => query.queryKey[0] === "series" && query.queryKey[2])
     .map((query) => query.queryKey[2]);
+  const seriesResolutions = client.getQueryCache().getAll()
+    .filter((query) => query.queryKey[0] === "series" && query.queryKey[2])
+    .map((query) => query.queryKey[5]);
   client.clear();
-  return { html, seriesMetrics };
+  return { html, seriesMetrics, seriesResolutions };
 }
 
 describe("metric availability on dashboard and charts", () => {
+  it.each([
+    ["1h", "raw", "Individual readings"], ["4h", "raw", "Individual readings"],
+    ["12h", "5m", "5-minute averages"], ["24h", "5m", "5-minute averages"],
+    ["7d", "1h", "Hourly averages"], ["30d", "1d", "Daily averages"],
+    ["1y", "1w", "Weekly averages"],
+  ])("requests and labels the appropriate averaging interval for %s", (range, resolution, label) => {
+    const {html, seriesResolutions} = renderMonitor(`/murali-living-room/charts?range=${range}`, {aqi_us: 50});
+    expect(seriesResolutions).toEqual([resolution]);
+    expect(html).toContain(label);
+  });
+
+  it("lets the backend choose All time detail from the device's history", () => {
+    expect(renderMonitor("/murali-living-room/charts?range=all", {aqi_us: 50}).seriesResolutions).toEqual(["auto"]);
+  });
+
   it.each(["/", "/charts"])("shows outdoor noise and hides indoor metrics on %s", (page) => {
     const {html} = renderMonitor(`/bellezea-outdoor${page}`, {
       aqi_us: 107, pm25_ugm3: 38, voc_ppm: 34.374, noise_db: 53,

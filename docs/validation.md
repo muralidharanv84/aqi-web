@@ -21,7 +21,9 @@
 ## Data Integrity Checks
 - Ensure null metrics are hidden from cards.
 - Confirm invalid series points are skipped and warning appears only when invalid points exist.
-- Verify automatic resolution: <24h uses `raw`, >24h uses `1h`.
+- Verify automatic resolution: up to 4h uses raw readings, up to 24h uses 5-minute averages, up to 14d uses hourly, up to 90d uses daily, up to 2y uses weekly, and longer uses monthly averages.
+- Verify All time chooses its averaging interval from the monitor's actual history and uses the same interval for all selected metrics.
+- Verify long-range ticks omit clock times, the averaging interval is visible, and tooltips retain min/max values and identify UTC calendar periods.
 
 ## Visual/Responsive Checks
 - Mobile viewport: single-column layout, readable AQI hero, segmented control scrolls.

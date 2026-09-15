@@ -1,5 +1,6 @@
 import { apiGet } from "./client";
 import type { DevicesResponse, LatestResponse, SeriesResponse } from "./types";
+import type { SeriesResolutionRequest } from "../domain/series";
 
 export function getDevices() {
   return apiGet<DevicesResponse>("/api/v1/devices");
@@ -13,7 +14,7 @@ type SeriesParams = {
   metric: string;
   from: number;
   to: number;
-  resolution: "raw" | "1h";
+  resolution: SeriesResolutionRequest;
 };
 
 export function getSeries(deviceId: string, params: SeriesParams) {

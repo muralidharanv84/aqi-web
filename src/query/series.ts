@@ -5,6 +5,7 @@ import {
   chooseSeriesResolution,
   normalizeSeriesPoints,
   type NormalizedSeriesPoint,
+  type SeriesResolutionRequest,
 } from "../domain/series";
 
 export type SeriesQuery = {
@@ -12,7 +13,7 @@ export type SeriesQuery = {
   metric: string;
   from: number;
   to: number;
-  resolution?: "raw" | "1h";
+  resolution?: SeriesResolutionRequest;
 };
 
 export function useSeries(params: SeriesQuery) {
@@ -37,12 +38,12 @@ type MultiSeriesQuery = {
   metrics: string[];
   from: number;
   to: number;
-  resolution?: "raw" | "1h";
+  resolution?: SeriesResolutionRequest;
 };
 
 export function useMultiSeries(params: MultiSeriesQuery) {
   const { deviceId, metrics, from, to, resolution } = params;
-  const resolvedResolution = resolution ?? chooseSeriesResolution(from, to);
+  const resolvedResolution = resolution ?? (from === 0 ? "auto" : chooseSeriesResolution(from, to));
   const queries = useQueries({
     queries: metrics.map((metric) => ({
       queryKey: ["series", deviceId, metric, from, to, resolvedResolution],
@@ -72,6 +73,7 @@ export function useMultiSeries(params: MultiSeriesQuery) {
     queries,
     seriesByMetric,
     invalidCountByMetric,
-    resolution: resolvedResolution,
+    resolution: queries.find((query) => query.data?.resolution)?.data?.resolution
+      ?? (resolvedResolution === "auto" ? "1h" : resolvedResolution),
   };
 }

@@ -6,19 +6,21 @@ import {
 } from "./series";
 
 describe("chooseSeriesResolution", () => {
-  it("returns raw for ranges up to 24h", () => {
-    expect(chooseSeriesResolution(0, 60 * 60)).toBe("raw");
-    expect(chooseSeriesResolution(0, 24 * 60 * 60)).toBe("raw");
-  });
-
-  it("returns 1h for ranges above 24h", () => {
-    expect(chooseSeriesResolution(0, 24 * 60 * 60 + 1)).toBe("1h");
+  it.each([
+    [3600, "raw"], [4 * 3600, "raw"], [4 * 3600 + 1, "5m"],
+    [12 * 3600, "5m"], [86400, "5m"], [86401, "1h"],
+    [7 * 86400, "1h"], [14 * 86400, "1h"], [14 * 86400 + 1, "1d"],
+    [30 * 86400, "1d"], [90 * 86400, "1d"], [90 * 86400 + 1, "1w"],
+    [365 * 86400, "1w"], [730 * 86400, "1w"], [730 * 86400 + 1, "1mo"],
+  ])("uses an appropriate resolution for a %i-second range", (seconds, resolution) => {
+    expect(chooseSeriesResolution(0, seconds)).toBe(resolution);
   });
 });
 
 describe("normalizeSeriesPoints", () => {
   it("normalizes timestamps and values from multiple shapes", () => {
     const response = {
+      resolution: "1w",
       points: [
         { ts: 1, value: 10, min: 8, max: 12, n: 4 },
         { t: 2, v: 11 },
@@ -32,6 +34,7 @@ describe("normalizeSeriesPoints", () => {
 
     expect(result.points).toHaveLength(4);
     expect(result.invalidCount).toBe(1);
+    expect(result.resolution).toBe("1w");
     expect(result.points[0]).toEqual({
       ts: 1,
       value: 10,
