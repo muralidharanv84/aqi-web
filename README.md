@@ -87,7 +87,7 @@ The same thresholds apply to custom ranges. The backend enforces a maximum 14-da
 - Noise readings are shown in **dB**, including on the `bellezea-outdoor` dashboard and charts
 - Unsupported chart selections in saved links or after switching monitors fall back to the first available metric; valid selections and the time range are preserved
 - Charts identify the averaging interval and use compact date labels at wider ranges
-- Compare defaults to living room versus outdoor AQI over 24 hours. The URL saves both monitors, the shared metric, and the range; Swap reverses the monitors
+- Compare defaults to living room versus outdoor AQI over 24 hours. The URL saves both monitors, the shared metric, and the range
 - Comparison uses one scale and the same averaging interval for both monitors. All time aligns differing monitor histories to the coarser interval. Missing readings remain absent; lines connect recorded points, and tooltips identify missing values
 - Series points are normalized from multiple backend point shapes (`value`, `v`, `avg`, etc.)
 - Invalid series points are dropped; UI surfaces a warning with invalid-point counts

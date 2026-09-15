@@ -79,9 +79,8 @@ export default function ComparePage() {
             <p className="mt-2 text-sm text-slate-600">Compare the same metric over the same time range on one scale.</p>
           </div>
           {devicesQuery.isLoading ? <p className="text-sm text-slate-500">Loading monitors…</p> : first && second ? (
-            <div className="grid items-end gap-3 sm:grid-cols-[1fr_auto_1fr]">
+            <div className="grid items-end gap-3 sm:grid-cols-2">
               <MonitorSelect label="First monitor" value={first.device_id} devices={devices} onChange={changeFirst} />
-              <button type="button" onClick={() => changeFirst(second.device_id)} className="min-h-[44px] rounded-lg border border-slate-300 px-4 text-sm text-slate-700 hover:bg-slate-50">Swap</button>
               <MonitorSelect label="Second monitor" value={second.device_id} devices={devices.filter((device) => device.device_id !== first.device_id)} onChange={(value) => updateParam("with", value)} />
             </div>
           ) : !devicesQuery.isError ? <p className="text-sm text-slate-600">At least two monitors are needed to compare readings.</p> : null}

@@ -48,7 +48,7 @@
 
 ## Compare Page
 - Open `/compare`; default to living room versus outdoor AQI over 24h. Navigation from a monitor keeps that monitor as the first selection.
-- Verify two monitor selectors, Swap, and only metrics reported by both monitors.
+- Verify two monitor selectors and only metrics reported by both monitors.
 - Compare AQI and PM2.5 using one scale, distinct lines, and monitor names in the legend/tooltips.
 - Switch to monitors with no shared metrics and verify the explanation and ability to choose another pair.
 - Verify every preset and custom range; All time must use the same averaging interval for both monitors even when their histories differ.

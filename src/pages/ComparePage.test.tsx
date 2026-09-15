@@ -34,7 +34,6 @@ describe("Compare page", () => {
     const {html, requests} = renderComparison("/murali-living-room/compare");
     expect(html).toContain("First monitor");
     expect(html).toContain("Second monitor");
-    expect(html).toContain(">Swap</button>");
     expect(html).toContain(">AQI</button>");
     expect(html).toContain(">PM2.5</button>");
     expect(html).not.toContain(">Temperature</button>");
