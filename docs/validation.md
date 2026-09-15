@@ -7,10 +7,12 @@
 
 ## Manual Smoke Tests
 - Load `/:deviceId/` and confirm the dashboard renders.
+- Load `/` and confirm it opens `/murali-living-room/`, with that monitor listed first in the device picker.
 - Verify device picker lists devices and updates URL on selection.
 - Confirm AQI hero shows value, category, and last updated time.
 - Toggle sparkline metric; chart updates without errors.
-- Verify stale indicator appears when latest timestamp is older than 5 minutes.
+- Verify stale indicator appears when latest timestamp is older than 5 minutes for indoor monitors.
+- For `bellezea-outdoor`, verify data up to and including 1 hour old is fresh, and data older than 1 hour is stale.
 - Test offline behavior: disconnect network and confirm offline banner shows and cached data remains.
 
 ## Data Integrity Checks

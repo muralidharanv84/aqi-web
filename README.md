@@ -70,9 +70,9 @@ Note: backend enforces a max `raw` range of 14 days.
 
 ## UI/Data Behavior (Current Implementation)
 
-- Device list is sorted by `device_id` ascending
+- Default monitor is `murali-living-room`; it appears first in the device picker, followed by other devices sorted by `device_id` ascending
 - Latest data is polled every **30 seconds**
-- Latest data is marked stale if timestamp age exceeds **5 minutes**
+- Latest data is marked stale if timestamp age exceeds **5 minutes**, or **1 hour** for `bellezea-outdoor` (collected every 10 minutes, with readings updating roughly every 30 minutes)
 - Series points are normalized from multiple backend point shapes (`value`, `v`, `avg`, etc.)
 - Invalid series points are dropped; UI surfaces a warning with invalid-point counts
 - Time display uses browser locale formatting via `Intl.DateTimeFormat` (configured `en-GB`, 24h)

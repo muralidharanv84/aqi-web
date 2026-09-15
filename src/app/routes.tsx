@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes as RouterRoutes } from "react-router-dom";
+import { DEFAULT_DEVICE_ID } from "../domain/devices";
 import AboutPage from "../pages/AboutPage";
 import ChartsPage from "../pages/ChartsPage";
 import DashboardPage from "../pages/DashboardPage";
@@ -8,7 +9,7 @@ export function Routes() {
     <RouterRoutes>
       <Route
         path="/"
-        element={<Navigate to="/murali-living-room/" replace />}
+        element={<Navigate to={`/${DEFAULT_DEVICE_ID}/`} replace />}
       />
       <Route path="/:deviceId/" element={<DashboardPage />} />
       <Route path="/:deviceId/charts" element={<ChartsPage />} />
