@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   CartesianGrid,
@@ -30,6 +30,7 @@ import { formatChartPeriod, formatChartTick, isCalendarResolution } from "../dom
 import { useDevices } from "../query/devices";
 import { useLatest } from "../query/latest";
 import { useMultiSeries } from "../query/series";
+import { CHART_RANGES, useChartRange } from "../query/chartRange";
 
 const METRIC_COLORS: Record<MetricKey, string> = {
   aqi: "#0f172a",
@@ -42,26 +43,7 @@ const METRIC_COLORS: Record<MetricKey, string> = {
   noise_db: "#a855f7",
 };
 
-const DEFAULT_RANGE = "7d";
-const RANGE_OPTIONS = [
-  "1h",
-  "4h",
-  "12h",
-  "24h",
-  "7d",
-  "30d",
-  "1y",
-  "all",
-  "custom",
-] as const;
 const DEFAULT_METRICS: MetricKey[] = ["aqi"];
-
-function formatDateTimeInput(value: Date) {
-  const pad = (item: number) => item.toString().padStart(2, "0");
-  return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(
-    value.getDate()
-  )}T${pad(value.getHours())}:${pad(value.getMinutes())}`;
-}
 
 export default function ChartsPage() {
   const navigate = useNavigate();
@@ -84,21 +66,7 @@ export default function ChartsPage() {
     searchParams.get("metrics")?.split(",").map((key) => key.trim()) ?? DEFAULT_METRICS,
     availableMetrics
   ), [searchParams, availableMetrics]);
-  const rangeParam = searchParams.get("range");
-  const rangePreset = RANGE_OPTIONS.includes(rangeParam as (typeof RANGE_OPTIONS)[number])
-    ? rangeParam as string
-    : DEFAULT_RANGE;
-  const [defaultFrom] = useState(() => {
-    const now = new Date();
-    const prior = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    return formatDateTimeInput(prior);
-  });
-  const [defaultTo] = useState(() =>
-    formatDateTimeInput(new Date())
-  );
-
-  const customFrom = searchParams.get("from") ?? defaultFrom;
-  const customTo = searchParams.get("to") ?? defaultTo;
+  const { rangePreset, customFrom, customTo, from, to, rangeLabel, isCustomInvalid } = useChartRange(searchParams);
 
   const updateParam = (key: string, value: string) => {
     setSearchParams((current) => {
@@ -132,59 +100,6 @@ export default function ChartsPage() {
       setSearchParams(nextParams, { replace: true });
     }
   }, [customFrom, customTo, latest, rangePreset, searchParams, selectedMetrics, setSearchParams]);
-
-  const { from, to, rangeLabel, isCustomInvalid } = useMemo(() => {
-    const end = Math.floor(Date.now() / 1000);
-    if (rangePreset === "custom") {
-      const fromMs = customFrom ? Date.parse(customFrom) : Number.NaN;
-      const toMs = customTo ? Date.parse(customTo) : Number.NaN;
-      const customInvalid =
-        !Number.isFinite(fromMs) || !Number.isFinite(toMs) || fromMs >= toMs;
-      return {
-        from: customInvalid ? end - 7 * 24 * 60 * 60 : Math.floor(fromMs / 1000),
-        to: customInvalid ? end : Math.floor(toMs / 1000),
-        rangeLabel: "Custom",
-        isCustomInvalid: customInvalid,
-      };
-    }
-
-    let rangeSeconds = 7 * 24 * 60 * 60;
-    let label = "7d";
-    switch (rangePreset) {
-      case "1h":
-        rangeSeconds = 60 * 60;
-        label = "1h";
-        break;
-      case "4h":
-        rangeSeconds = 4 * 60 * 60;
-        label = "4h";
-        break;
-      case "12h":
-        rangeSeconds = 12 * 60 * 60;
-        label = "12h";
-        break;
-      case "24h":
-        rangeSeconds = 24 * 60 * 60;
-        label = "24h";
-        break;
-      case "30d":
-        rangeSeconds = 30 * 24 * 60 * 60;
-        label = "30d";
-        break;
-      case "1y":
-        rangeSeconds = 365 * 24 * 60 * 60;
-        label = "1y";
-        break;
-      case "all":
-        return { from: 0, to: end, rangeLabel: "All time", isCustomInvalid: false };
-      case "7d":
-      default:
-        rangeSeconds = 7 * 24 * 60 * 60;
-        label = "7d";
-        break;
-    }
-    return { from: end - rangeSeconds, to: end, rangeLabel: label, isCustomInvalid: false };
-  }, [customFrom, customTo, rangePreset]);
 
   const effectiveMetrics = isCustomInvalid ? [] : selectedMetrics;
 
@@ -376,17 +291,7 @@ export default function ChartsPage() {
               </div>
               <TimeRangeSelector
                 value={rangePreset}
-                options={[
-                  { label: "1h", value: "1h" },
-                  { label: "4h", value: "4h" },
-                  { label: "12h", value: "12h" },
-                  { label: "24h", value: "24h" },
-                  { label: "7d", value: "7d" },
-                  { label: "30d", value: "30d" },
-                  { label: "1y", value: "1y" },
-                  { label: "All time", value: "all" },
-                  { label: "Custom", value: "custom" },
-                ]}
+                options={CHART_RANGES}
                 onChange={(next) => updateParam("range", next)}
               />
             </div>

@@ -1,0 +1,35 @@
+import type { Device, LatestResponse } from "../api/types";
+import { DEFAULT_DEVICE_ID } from "./devices";
+import { getAvailableMetrics } from "./metrics";
+import type { NormalizedSeriesPoint, SeriesResolution } from "./series";
+
+export function chooseComparisonDevices(devices: Device[], requestedFirst?: string, requestedSecond?: string | null) {
+  const first = devices.find((device) => device.device_id === requestedFirst)
+    ?? devices.find((device) => device.device_id === DEFAULT_DEVICE_ID) ?? devices[0];
+  const others = devices.filter((device) => device.device_id !== first?.device_id);
+  const second = others.find((device) => device.device_id === requestedSecond)
+    ?? others.find((device) => device.device_id === "bellezea-outdoor") ?? others[0];
+  return { first, second };
+}
+
+export function getSharedMetrics(first?: LatestResponse, second?: LatestResponse) {
+  const secondKeys = new Set(getAvailableMetrics(second?.metrics, second?.device_id).map((metric) => metric.key));
+  return getAvailableMetrics(first?.metrics, first?.device_id).filter((metric) => secondKeys.has(metric.key));
+}
+
+export function coarsestResolution(resolutions: SeriesResolution[]): SeriesResolution {
+  const ordered: SeriesResolution[] = ["raw", "5m", "1h", "1d", "1w", "1mo"];
+  return ordered[Math.max(...resolutions.map((resolution) => ordered.indexOf(resolution)))];
+}
+
+export function mergeComparisonSeries(first: NormalizedSeriesPoint[], second: NormalizedSeriesPoint[]) {
+  const rows = new Map<number, { ts: number; first?: number; second?: number }>();
+  for (const [key, points] of [["first", first], ["second", second]] as const) {
+    for (const point of points) {
+      const row = rows.get(point.ts) ?? { ts: point.ts * 1000 };
+      row[key] = point.value;
+      rows.set(point.ts, row);
+    }
+  }
+  return [...rows.values()].sort((a, b) => a.ts - b.ts);
+}

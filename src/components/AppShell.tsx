@@ -17,13 +17,14 @@ export default function AppShell({
     ? [
         { to: `${navBase}/`, label: "Dashboard", end: true },
         { to: `${navBase}/charts`, label: "Charts" },
+        { to: `${navBase}/compare`, label: "Compare" },
         { to: `${navBase}/about`, label: "About" },
       ]
     : [];
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="mx-auto flex max-w-5xl flex-col gap-3 px-4 py-4 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
             <div className="flex items-center gap-2 text-lg font-semibold tracking-tight text-slate-900">
               <span className="flex h-9 w-9 items-center justify-center rounded-full bg-emerald-50">
