@@ -37,9 +37,8 @@ export default function ComparisonChart(props: Props) {
           <Legend wrapperStyle={{fontSize: 12, overflowWrap: "anywhere"}} />
           {(["first", "second"] as const).map((key, index) => (
             <Line key={key} dataKey={key} name={index === 0 ? firstName : secondName}
-              type="linear" stroke={COMPARISON_COLORS[index]} strokeWidth={2.5}
-              strokeDasharray={index === 1 ? "6 4" : undefined}
-              dot={(index === 0 ? first : second).length <= 12}
+              type="monotone" stroke={COMPARISON_COLORS[index]} strokeWidth={2.5}
+              dot={(index === 0 ? first : second).length === 1}
               connectNulls isAnimationActive={false} />
           ))}
         </LineChart>
