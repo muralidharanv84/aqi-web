@@ -1,0 +1,11 @@
+{
+  "name": "aqi-web-legacy-redirect",
+  "main": "index.ts",
+  "compatibility_date": "2026-09-15",
+  "workers_dev": false,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "routes": [
+    { "pattern": "aqi.orangeiqlabs.com/*", "zone_name": "orangeiqlabs.com" }
+  ]
+}

@@ -142,7 +142,7 @@ Vite runs on `http://localhost:5173` by default.
 
 The API base defaults to:
 
-- `https://aqi-backend.orangeiqlabs.com`
+- `https://aqi-backend.murali.page`
 
 Override with an env var in `.env.local`:
 
@@ -203,10 +203,25 @@ npm run test:run
 
 ## Deployment Notes
 
+- Production dashboard: `https://aqi.murali.page`
+- Production API: `https://aqi-backend.murali.page`
 - Static output is generated to `dist/`
 - Designed for Cloudflare Pages
 - SPA fallback is configured with `public/_redirects`
 - No frontend secrets are required
+
+### Legacy domain redirects
+
+`infra/legacy-redirect` is a small Cloudflare Worker on `aqi.orangeiqlabs.com/*`.
+It returns **301 Permanent Redirect** to `https://aqi.murali.page`, preserving
+the path and query string. Keep the old proxied DNS record and Pages domain
+association so the old address retains DNS and TLS coverage.
+
+Deploy the frontend with `wrangler pages deploy dist --project-name aqi-web --branch main`.
+Deploy the redirect with `wrangler deploy --config infra/legacy-redirect/wrangler.jsonc`.
+The API's **308 Permanent Redirect** is implemented in `../aqi-backend`, preserving
+methods and signed device upload bodies. Both old and new API routes are declared
+in that repository's `wrangler.jsonc`.
 
 ## Useful Docs In This Repo
 

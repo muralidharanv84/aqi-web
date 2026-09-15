@@ -43,7 +43,7 @@ No login. No editing. Read-only and fast.
 ## 3. Deployment & URLs
 
 - Production URL:  
-  https://aqi.orangeiqlabs.com
+  https://aqi.murali.page
 
 - Device-scoped routing:
   ```
