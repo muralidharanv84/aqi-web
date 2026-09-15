@@ -9,6 +9,9 @@
 - Load `/:deviceId/` and confirm the dashboard renders.
 - Load `/` and confirm it opens `/murali-living-room/`, with that monitor listed first in the device picker.
 - Verify device picker lists devices and updates URL on selection.
+- On both pages, verify only reported metrics appear in the selector; `murali-1` hides both VOC metrics and `bellezea-outdoor` includes Noise but no Temperature, Humidity, or CO2.
+- Verify outdoor Noise displays in dB and can be selected for the dashboard sparkline and charts.
+- Switch monitors with an unsupported metric selected, or load a saved chart link with that metric; verify selection falls back to an available metric and preserves the time range.
 - Confirm AQI hero shows value, category, and last updated time.
 - Toggle sparkline metric; chart updates without errors.
 - Verify stale indicator appears when latest timestamp is older than 5 minutes for indoor monitors.

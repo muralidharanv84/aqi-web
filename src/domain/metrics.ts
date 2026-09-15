@@ -5,7 +5,8 @@ export type MetricKey =
   | "voc_index"
   | "voc_ppm"
   | "temperature_c"
-  | "humidity";
+  | "humidity"
+  | "noise_db";
 
 export type MetricDefinition = {
   key: MetricKey;
@@ -22,7 +23,33 @@ export const METRICS: MetricDefinition[] = [
   { key: "voc_ppm", label: "VOC", unit: "ppm", apiKey: "voc_ppm" },
   { key: "temperature_c", label: "Temperature", unit: "C", apiKey: "temp_c" },
   { key: "humidity", label: "Humidity", unit: "%", apiKey: "rh_pct" },
+  { key: "noise_db", label: "Noise", unit: "dB", apiKey: "noise_db" },
 ];
+
+// These archived readings should not be offered for this monitor.
+const HIDDEN_METRICS_BY_DEVICE: Record<string, readonly MetricKey[] | undefined> = {
+  "murali-1": ["voc_index", "voc_ppm"],
+};
+
+export function getAvailableMetrics(
+  readings: Record<string, number | null | undefined> | undefined,
+  deviceId?: string
+): MetricDefinition[] {
+  const hiddenMetrics = deviceId ? HIDDEN_METRICS_BY_DEVICE[deviceId] : undefined;
+  return METRICS.filter((metric) =>
+    Number.isFinite(readings?.[metric.apiKey]) && !hiddenMetrics?.includes(metric.key)
+  );
+}
+
+export function selectAvailableMetrics(
+  requested: readonly string[],
+  available: readonly MetricDefinition[]
+): MetricKey[] {
+  const selected = [...new Set(requested)].filter((key): key is MetricKey =>
+    available.some((metric) => metric.key === key)
+  );
+  return selected.length ? selected : available.slice(0, 1).map((metric) => metric.key);
+}
 
 const METRIC_BY_KEY = new Map(METRICS.map((metric) => [metric.key, metric]));
 

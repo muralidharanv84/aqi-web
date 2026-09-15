@@ -60,6 +60,7 @@ Supported metric API keys expected by the frontend:
 - `voc_ppm`
 - `temp_c`
 - `rh_pct`
+- `noise_db`
 
 Series resolution strategy in the frontend:
 
@@ -73,6 +74,10 @@ Note: backend enforces a max `raw` range of 14 days.
 - Default monitor is `murali-living-room`; it appears first in the device picker, followed by other devices sorted by `device_id` ascending
 - Latest data is polled every **30 seconds**
 - Latest data is marked stale if timestamp age exceeds **5 minutes**, or **1 hour** for `bellezea-outdoor` (collected every 10 minutes, with readings updating roughly every 30 minutes)
+- Dashboard cards and metric selectors on both pages show only finite values reported in the monitor's latest readings; zero is a valid reading
+- VOC and VOC Index are hidden for `murali-1`, including its archived readings
+- Noise readings are shown in **dB**, including on the `bellezea-outdoor` dashboard and charts
+- Unsupported chart selections in saved links or after switching monitors fall back to the first available metric; valid selections and the time range are preserved
 - Series points are normalized from multiple backend point shapes (`value`, `v`, `avg`, etc.)
 - Invalid series points are dropped; UI surfaces a warning with invalid-point counts
 - Time display uses browser locale formatting via `Intl.DateTimeFormat` (configured `en-GB`, 24h)

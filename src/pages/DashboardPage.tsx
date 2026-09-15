@@ -10,9 +10,11 @@ import Sparkline from "../components/Sparkline";
 import { getAqiCategoryForValue } from "../domain/aqi";
 import {
   formatMetricValue,
+  getAvailableMetrics,
   getMetricApiKey,
   getMetricDefinition,
   getMetricStatus,
+  selectAvailableMetrics,
 } from "../domain/metrics";
 import type { MetricKey } from "../domain/metrics";
 import { formatDateTime } from "../domain/time";
@@ -23,7 +25,7 @@ import { useSeries } from "../query/series";
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { deviceId } = useParams();
-  const [sparkMetric, setSparkMetric] = useState<MetricKey>("aqi");
+  const [requestedSparkMetric, setSparkMetric] = useState<MetricKey>("aqi");
 
   const {
     data: devices = [],
@@ -38,6 +40,14 @@ export default function DashboardPage() {
     error: latestErrorDetail,
   } = useLatest(deviceId);
 
+  const availableMetrics = useMemo(
+    () => getAvailableMetrics(latest?.metrics, deviceId),
+    [latest?.metrics, deviceId]
+  );
+  const sparkMetric = selectAvailableMetrics(
+    [requestedSparkMetric], availableMetrics
+  )[0];
+
   const { from, to } = useMemo(() => {
     const end = Math.floor(Date.now() / 1000);
     return { from: end - 7 * 24 * 60 * 60, to: end };
@@ -50,7 +60,7 @@ export default function DashboardPage() {
     error: seriesErrorDetail,
   } = useSeries({
     deviceId,
-    metric: getMetricApiKey(sparkMetric),
+    metric: sparkMetric ? getMetricApiKey(sparkMetric) : "",
     from,
     to,
   });
@@ -69,28 +79,19 @@ export default function DashboardPage() {
     if (!latest) {
       return [];
     }
-    const entries: { key: MetricKey; value: number | null | undefined }[] = [
-      { key: "pm25", value: latest.metrics?.pm25_ugm3 },
-      { key: "co2", value: latest.metrics?.co2_ppm },
-      { key: "voc_index", value: latest.metrics?.voc_index },
-      { key: "voc_ppm", value: latest.metrics?.voc_ppm },
-      { key: "temperature_c", value: latest.metrics?.temp_c },
-      { key: "humidity", value: latest.metrics?.rh_pct },
-    ];
-
-    return entries
-      .filter((entry) => entry.value !== null && entry.value !== undefined)
-      .map((entry) => {
-        const definition = getMetricDefinition(entry.key);
-        const status = getMetricStatus(entry.key, entry.value as number);
+    return availableMetrics
+      .filter((metric) => metric.key !== "aqi")
+      .map((definition) => {
+        const value = latest.metrics[definition.apiKey] as number;
+        const status = getMetricStatus(definition.key, value);
         return {
-          key: entry.key,
+          key: definition.key,
           label: definition.label,
-          value: formatMetricValue(entry.key, entry.value as number),
+          value: formatMetricValue(definition.key, value),
           status,
         };
       });
-  }, [latest]);
+  }, [latest, availableMetrics]);
 
   const aqiValue = latest?.metrics?.aqi_us;
   const category =
@@ -100,7 +101,7 @@ export default function DashboardPage() {
 
   const lastUpdated = latest?.ts ? formatDateTime(latest.ts) : undefined;
 
-  const sparkMetricLabel = getMetricDefinition(sparkMetric).label;
+  const sparkMetricLabel = sparkMetric ? getMetricDefinition(sparkMetric).label : "";
 
   const hasError = devicesError || latestError || seriesError;
   const isLoading = devicesLoading || latestLoading || seriesLoading;
@@ -161,13 +162,19 @@ export default function DashboardPage() {
             No device selected. Choose a device to begin.
           </div>
         ) : null}
-        <AqiHero
-          aqi={(aqiValue ?? null) as number | null}
-          category={category}
-          description={category?.description}
-          lastUpdated={lastUpdated}
-          stale={latest?.stale}
-        />
+        {availableMetrics.some((metric) => metric.key === "aqi") ? (
+          <AqiHero
+            aqi={(aqiValue ?? null) as number | null}
+            category={category}
+            description={category?.description}
+            lastUpdated={lastUpdated}
+            stale={latest?.stale}
+          />
+        ) : latest ? (
+          <div className="text-sm text-slate-500">
+            {latest.stale ? "Stale data. " : ""}Last updated: {lastUpdated ?? "--"}
+          </div>
+        ) : null}
         {isLoading && cards.length === 0 ? (
           <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
             {Array.from({ length: 6 }).map((_, index) => (
@@ -184,25 +191,24 @@ export default function DashboardPage() {
           <MetricCards metrics={cards} />
         )}
         <PurifierControlPanel fanControl={latest?.fan_control ?? null} />
-        <MetricSegmentedControl
-          value={sparkMetric}
-          options={[
-            { label: "AQI", value: "aqi" },
-            { label: "PM2.5", value: "pm25" },
-            { label: "CO2", value: "co2" },
-            { label: "VOC Index", value: "voc_index" },
-            { label: "VOC", value: "voc_ppm" },
-            { label: "Temp", value: "temperature_c" },
-            { label: "RH", value: "humidity" },
-          ]}
-          onChange={(value) => setSparkMetric(value as MetricKey)}
-        />
+        {sparkMetric ? (
+          <MetricSegmentedControl
+            value={sparkMetric}
+            options={availableMetrics.map((metric) => ({
+              label: metric.label,
+              value: metric.key,
+            }))}
+            onChange={(value) => setSparkMetric(value as MetricKey)}
+          />
+        ) : !latestLoading && !latestError ? (
+          <div className="text-sm text-slate-500">No metrics available for this monitor.</div>
+        ) : null}
         {seriesLoading && seriesPoints.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
             <div className="h-3 w-24 animate-pulse rounded bg-slate-200" />
             <div className="mt-4 h-28 animate-pulse rounded bg-slate-100" />
           </div>
-        ) : (
+        ) : sparkMetric ? (
           <Sparkline
             points={seriesPoints}
             metricLabel={sparkMetricLabel}
@@ -210,7 +216,7 @@ export default function DashboardPage() {
             metricKey={sparkMetric}
             seriesSignature={seriesSignature}
           />
-        )}
+        ) : null}
       </div>
     </AppShell>
   );

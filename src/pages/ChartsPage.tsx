@@ -1,4 +1,4 @@
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useState } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   CartesianGrid,
@@ -17,9 +17,10 @@ import MetricMultiSelect from "../components/MetricMultiSelect";
 import TimeRangeSelector from "../components/TimeRangeSelector";
 import {
   formatMetricValue,
+  getAvailableMetrics,
   getMetricApiKey,
   getMetricDefinition,
-  METRICS,
+  selectAvailableMetrics,
 } from "../domain/metrics";
 import type { MetricKey } from "../domain/metrics";
 import { getAqiCategoryForValue } from "../domain/aqi";
@@ -27,6 +28,7 @@ import { mergeSeriesPoints } from "../domain/series";
 import type { NormalizedSeriesPoint } from "../domain/series";
 import { formatDateTimeMs } from "../domain/time";
 import { useDevices } from "../query/devices";
+import { useLatest } from "../query/latest";
 import { useMultiSeries } from "../query/series";
 
 const METRIC_COLORS: Record<MetricKey, string> = {
@@ -37,6 +39,7 @@ const METRIC_COLORS: Record<MetricKey, string> = {
   voc_ppm: "#06b6d4",
   temperature_c: "#64748b",
   humidity: "#4f46e5",
+  noise_db: "#a855f7",
 };
 
 const DEFAULT_RANGE = "7d";
@@ -53,10 +56,6 @@ const RANGE_OPTIONS = [
 ] as const;
 const DEFAULT_METRICS: MetricKey[] = ["aqi"];
 
-function isMetricKey(value: string): value is MetricKey {
-  return METRICS.some((metric) => metric.key === value);
-}
-
 function formatDateTimeInput(value: Date) {
   const pad = (item: number) => item.toString().padStart(2, "0");
   return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(
@@ -68,63 +67,51 @@ export default function ChartsPage() {
   const navigate = useNavigate();
   const { deviceId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const lastSyncedParams = useRef<string | null>(null);
   const {
     data: devices = [],
     isError: devicesError,
   } = useDevices();
-  const [selectedMetrics, setSelectedMetrics] =
-    useState<MetricKey[]>(DEFAULT_METRICS);
-  const [rangePreset, setRangePreset] = useState(DEFAULT_RANGE);
-  const [customFrom, setCustomFrom] = useState(() => {
+  const {
+    data: latest,
+    isLoading: latestLoading,
+    isError: latestError,
+  } = useLatest(deviceId);
+  const availableMetrics = useMemo(
+    () => getAvailableMetrics(latest?.metrics, deviceId),
+    [latest?.metrics, deviceId]
+  );
+  const selectedMetrics = useMemo(() => selectAvailableMetrics(
+    searchParams.get("metrics")?.split(",").map((key) => key.trim()) ?? DEFAULT_METRICS,
+    availableMetrics
+  ), [searchParams, availableMetrics]);
+  const rangeParam = searchParams.get("range");
+  const rangePreset = RANGE_OPTIONS.includes(rangeParam as (typeof RANGE_OPTIONS)[number])
+    ? rangeParam as string
+    : DEFAULT_RANGE;
+  const [defaultFrom] = useState(() => {
     const now = new Date();
     const prior = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
     return formatDateTimeInput(prior);
   });
-  const [customTo, setCustomTo] = useState(() =>
+  const [defaultTo] = useState(() =>
     formatDateTimeInput(new Date())
   );
 
-  useEffect(() => {
-    const rangeParam = searchParams.get("range");
-    const metricsParam = searchParams.get("metrics");
-    const fromParam = searchParams.get("from");
-    const toParam = searchParams.get("to");
+  const customFrom = searchParams.get("from") ?? defaultFrom;
+  const customTo = searchParams.get("to") ?? defaultTo;
 
-    const parsedRange = RANGE_OPTIONS.includes(
-      rangeParam as (typeof RANGE_OPTIONS)[number]
-    )
-      ? rangeParam
-      : DEFAULT_RANGE;
-
-    const parsedMetrics = metricsParam
-      ? metricsParam
-          .split(",")
-          .map((item) => item.trim())
-          .filter((item) => item.length > 0)
-          .filter(isMetricKey)
-      : DEFAULT_METRICS;
-
-    const currentParams = searchParams.toString();
-    if (currentParams === lastSyncedParams.current) {
-      return;
-    }
-
-    setRangePreset(parsedRange ?? DEFAULT_RANGE);
-    setSelectedMetrics(parsedMetrics.length ? parsedMetrics : DEFAULT_METRICS);
-
-    if (parsedRange === "custom") {
-      if (fromParam) {
-        setCustomFrom(fromParam);
-      }
-      if (toParam) {
-        setCustomTo(toParam);
-      }
-    }
-  }, [searchParams]);
+  const updateParam = (key: string, value: string) => {
+    setSearchParams((current) => {
+      const next = new URLSearchParams(current);
+      next.set(key, value);
+      return next;
+    }, { replace: true });
+  };
 
   useEffect(() => {
-    const nextParams = new URLSearchParams();
+    // Preserve bookmarked selections until this monitor's readings have loaded.
+    if (!latest) return;
+    const nextParams = new URLSearchParams(searchParams);
     nextParams.set("range", rangePreset);
     if (selectedMetrics.length) {
       nextParams.set("metrics", selectedMetrics.join(","));
@@ -142,10 +129,9 @@ export default function ChartsPage() {
     const current = searchParams.toString();
     const next = nextParams.toString();
     if (current !== next) {
-      lastSyncedParams.current = next;
       setSearchParams(nextParams, { replace: true });
     }
-  }, [customFrom, customTo, rangePreset, searchParams, selectedMetrics, setSearchParams]);
+  }, [customFrom, customTo, latest, rangePreset, searchParams, selectedMetrics, setSearchParams]);
 
   const { from, to, rangeLabel, isCustomInvalid } = useMemo(() => {
     const end = Math.floor(Date.now() / 1000);
@@ -202,7 +188,7 @@ export default function ChartsPage() {
 
   const effectiveMetrics = isCustomInvalid ? [] : selectedMetrics;
 
-  const metricOptions = METRICS.map((metric) => ({
+  const metricOptions = availableMetrics.map((metric) => ({
     label: metric.label,
     value: metric.key,
   }));
@@ -282,6 +268,7 @@ export default function ChartsPage() {
       voc_ppm: new Map(),
       temperature_c: new Map(),
       humidity: new Map(),
+      noise_db: new Map(),
     };
     selectedMetrics.forEach((metricKey) => {
       const points = seriesByMetricKey[metricKey] ?? [];
@@ -307,6 +294,7 @@ export default function ChartsPage() {
 
   const errorSources = [
     devicesError ? "devices" : null,
+    latestError ? "latest" : null,
     seriesError ? "series" : null,
   ]
     .filter(Boolean)
@@ -336,7 +324,7 @@ export default function ChartsPage() {
           <DevicePicker
             devices={devices}
             value={deviceId}
-            onChange={(nextId) => navigate(`/${nextId}/charts`)}
+            onChange={(nextId) => navigate(`/${nextId}/charts?${searchParams}`)}
           />
         ) : null
       }
@@ -347,7 +335,7 @@ export default function ChartsPage() {
             No device selected. Choose a device to begin.
           </div>
         ) : null}
-        {devicesError || seriesError ? (
+        {devicesError || latestError || seriesError ? (
           <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
             Some data failed to load ({errorSources}). Showing the most recent cached values.
           </div>
@@ -367,12 +355,20 @@ export default function ChartsPage() {
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                 Metrics
               </div>
-              <MetricMultiSelect
-                value={selectedMetrics}
-                options={metricOptions}
-                minSelected={1}
-                onChange={(next) => setSelectedMetrics(next as MetricKey[])}
-              />
+              {latestLoading ? (
+                <div className="text-sm text-slate-500">Loading metrics…</div>
+              ) : metricOptions.length ? (
+                <MetricMultiSelect
+                  value={selectedMetrics}
+                  options={metricOptions}
+                  minSelected={1}
+                  onChange={(next) => updateParam("metrics", next.join(","))}
+                />
+              ) : (
+                <div className="text-sm text-slate-500">
+                  {latestError ? "Unable to load metrics." : "No metrics available for this monitor."}
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <div className="text-xs font-semibold uppercase tracking-wide text-slate-500">
@@ -391,7 +387,7 @@ export default function ChartsPage() {
                   { label: "All time", value: "all" },
                   { label: "Custom", value: "custom" },
                 ]}
-                onChange={setRangePreset}
+                onChange={(next) => updateParam("range", next)}
               />
             </div>
           </div>
@@ -404,7 +400,7 @@ export default function ChartsPage() {
                 <input
                   type="datetime-local"
                   value={customFrom}
-                  onChange={(event) => setCustomFrom(event.target.value)}
+                  onChange={(event) => updateParam("from", event.target.value)}
                   className="w-full min-h-[44px] rounded-lg border border-slate-200 bg-white px-3 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none"
                 />
               </label>
@@ -415,7 +411,7 @@ export default function ChartsPage() {
                 <input
                   type="datetime-local"
                   value={customTo}
-                  onChange={(event) => setCustomTo(event.target.value)}
+                  onChange={(event) => updateParam("to", event.target.value)}
                   className="w-full min-h-[44px] rounded-lg border border-slate-200 bg-white px-3 text-slate-900 shadow-sm focus:border-slate-400 focus:outline-none"
                 />
               </label>
@@ -436,7 +432,7 @@ export default function ChartsPage() {
             <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-500">
               Select a valid custom range to view data.
             </div>
-          ) : seriesLoading && chartData.length === 0 ? (
+          ) : (latestLoading || seriesLoading) && chartData.length === 0 ? (
             <div className="h-56 animate-pulse rounded-xl border border-slate-200 bg-slate-50" />
           ) : chartData.length === 0 ? (
             <div className="flex h-56 items-center justify-center rounded-xl border border-dashed border-slate-200 text-sm text-slate-500">
@@ -516,7 +512,7 @@ export default function ChartsPage() {
                         metricKey === "aqi" ? aqiStroke : METRIC_COLORS[metricKey]
                       }
                       strokeWidth={2}
-                      dot={false}
+                      dot={(seriesByMetricKey[metricKey]?.length ?? 0) === 1}
                       isAnimationActive={false}
                       name={getMetricDefinition(metricKey).label}
                     />

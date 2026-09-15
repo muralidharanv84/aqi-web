@@ -11,7 +11,7 @@ import {
 } from "recharts";
 import type { TooltipProps } from "recharts";
 import type { MetricKey } from "../domain/metrics";
-import { getMetricStatus } from "../domain/metrics";
+import { formatMetricValue, getMetricStatus } from "../domain/metrics";
 import { getAqiCategoryForValue } from "../domain/aqi";
 import { formatDateTimeMs } from "../domain/time";
 
@@ -202,7 +202,7 @@ function Sparkline({
                       : "rgba(15, 23, 42, 0.08)"
                   }
                   fillOpacity={1}
-                  dot={false}
+                  dot={safePoints.length === 1}
                   activeDot={<ActiveDot />}
                   isAnimationActive={shouldAnimate}
                 />
@@ -263,7 +263,7 @@ function SparklineTooltip({
         <div className="text-lg font-semibold text-slate-900">
           {metricKey === "aqi"
             ? Math.round(data.value).toString()
-            : formatSparkValue(data.value)}
+            : formatMetricValue(metricKey, data.value)}
         </div>
         {data.status ? (
           <span
