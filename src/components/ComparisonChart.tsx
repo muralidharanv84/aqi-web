@@ -1,6 +1,7 @@
 import { useMemo } from "react";
-import { CartesianGrid, Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import type { TooltipProps } from "recharts";
+import { AQI_CATEGORIES } from "../domain/aqi";
 import { findClosestReading, mergeComparisonSeries } from "../domain/comparison";
 import { formatMetricValue } from "../domain/metrics";
 import type { MetricDefinition } from "../domain/metrics";
@@ -30,6 +31,12 @@ export default function ComparisonChart(props: Props) {
             tickFormatter={(value) => formatChartTick(value as number, resolution)}
             tick={{fill: "#64748b", fontSize: 11}} axisLine={false} tickLine={false} minTickGap={40} tickCount={6} />
           <YAxis tick={{fill: "#64748b", fontSize: 11}} axisLine={false} tickLine={false} width={48} />
+          {metric.key === "aqi" && AQI_CATEGORIES.filter((category) => Number.isFinite(category.max)).map((category) => (
+            <ReferenceLine key={category.label} y={category.max} ifOverflow="discard"
+              stroke={category.color} strokeWidth={1.5} strokeDasharray="3 5" strokeLinecap="round"
+              label={{value: `${category.label} ≤ ${category.max}`, position: "insideTopRight",
+                fill: "#475569", fontSize: 10, stroke: "#fff", strokeWidth: 3, paintOrder: "stroke", offset: 6}} />
+          ))}
           <Tooltip content={<ComparisonTooltip names={[firstName, secondName]} series={[first, second]} metric={metric} resolution={resolution} />} />
           <Legend wrapperStyle={{fontSize: 12, overflowWrap: "anywhere"}} />
           {(["first", "second"] as const).map((key, index) => (
