@@ -16,6 +16,8 @@ dist/
 
 # Vite
 .vite/
+.wrangler/
+.dev.vars*
 
 # Editor/OS
 .DS_Store

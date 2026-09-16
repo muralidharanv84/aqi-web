@@ -1,0 +1,9 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "aqi-web",
+  "pages_build_output_dir": "./dist",
+  "compatibility_date": "2026-09-16",
+  "services": [
+    { "binding": "AQI_API", "service": "aqi-backend" }
+  ]
+}

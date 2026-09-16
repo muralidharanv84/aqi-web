@@ -2,7 +2,7 @@
 
 Frontend for the Home AQI system: a fast, mobile-first dashboard and charts UI for indoor air quality data.
 
-This app is built with React + TypeScript + Vite, deployed as a static site, and reads data from the `aqi-backend` API.
+This app is built with React + TypeScript + Vite, deployed on Cloudflare Pages, and reads data from the `aqi-backend` API through a same-origin Pages Function.
 
 ## What This App Does
 
@@ -140,9 +140,12 @@ Vite runs on `http://localhost:5173` by default.
 
 ### API base URL configuration
 
-The API base defaults to:
+Production builds request `/api/v1/...` on the page's own origin. A Pages Function
+forwards the public read endpoints to the existing `aqi-backend` Worker through
+the `AQI_API` service binding. Browser requests no longer depend on cross-origin
+access to the separate API hostname.
 
-- `https://aqi-backend.murali.page`
+The Vite development server defaults to `https://aqi-backend.murali.page`.
 
 Override with an env var in `.env.local`:
 
@@ -207,6 +210,9 @@ npm run test:run
 - Production API: `https://aqi-backend.murali.page`
 - Static output is generated to `dist/`
 - Designed for Cloudflare Pages
+- `wrangler.jsonc` declares the `AQI_API` service binding to `aqi-backend`
+- `functions/api/[[path]].ts` serves public GET reads only; device uploads continue to use the public API hostname
+- `public/_routes.json` limits function invocations to `/api/*`
 - SPA fallback is configured with `public/_redirects`
 - No frontend secrets are required
 
@@ -218,6 +224,9 @@ the path and query string. Keep the old proxied DNS record and Pages domain
 association so the old address retains DNS and TLS coverage.
 
 Deploy the frontend with `wrangler pages deploy dist --project-name aqi-web --branch main`.
+Run `npm run build` first. To preview a production build with its API route locally,
+use `wrangler pages dev dist` alongside a local `aqi-backend` Worker, or set
+`VITE_API_BASE_URL` explicitly when using Vite's static preview.
 Deploy the redirect with `wrangler deploy --config infra/legacy-redirect/wrangler.jsonc`.
 The API's **308 Permanent Redirect** is implemented in `../aqi-backend`, preserving
 methods and signed device upload bodies. Both old and new API routes are declared

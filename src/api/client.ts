@@ -7,7 +7,7 @@ type ApiGetOptions<T> = {
 
 const baseUrl =
   import.meta.env.VITE_API_BASE_URL?.toString() ??
-  "https://aqi-backend.murali.page";
+  (import.meta.env.DEV ? "https://aqi-backend.murali.page" : "");
 
 function buildUrl(path: string, params?: QueryParams) {
   const url = new URL(path, baseUrl || window.location.origin);
