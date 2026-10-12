@@ -13,8 +13,8 @@ export function chooseComparisonDevices(devices: Device[], requestedFirst?: stri
 }
 
 export function getSharedMetrics(first?: LatestResponse, second?: LatestResponse) {
-  const secondKeys = new Set(getAvailableMetrics(second?.metrics, second?.device_id).map((metric) => metric.key));
-  return getAvailableMetrics(first?.metrics, first?.device_id).filter((metric) => secondKeys.has(metric.key));
+  const secondKeys = new Set(getAvailableMetrics(second?.metrics).map((metric) => metric.key));
+  return getAvailableMetrics(first?.metrics).filter((metric) => secondKeys.has(metric.key));
 }
 
 export function coarsestResolution(resolutions: SeriesResolution[]): SeriesResolution {

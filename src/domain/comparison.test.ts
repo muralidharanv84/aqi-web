@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { chooseComparisonDevices, findClosestReading, getSharedMetrics, mergeComparisonSeries } from "./comparison";
 
 describe("monitor comparisons", () => {
-  const devices = ["murali-1", "bellezea-outdoor", "murali-living-room"].map(device_id => ({device_id}));
+  const devices = ["temperature-monitor", "bellezea-outdoor", "murali-living-room"].map(device_id => ({device_id}));
   it("defaults to the living room and outdoor monitor and prevents duplicate selections", () => {
     expect(chooseComparisonDevices(devices)).toEqual({first: devices[2], second: devices[1]});
     expect(chooseComparisonDevices(devices, "bellezea-outdoor", "bellezea-outdoor").second?.device_id).not.toBe("bellezea-outdoor");

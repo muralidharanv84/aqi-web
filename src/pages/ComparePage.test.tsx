@@ -7,7 +7,7 @@ import ComparePage from "./ComparePage";
 
 function renderComparison(location: string, omitOutdoor = false) {
   const client = new QueryClient();
-  const deviceIds = ["murali-living-room", "bellezea-outdoor", "murali-1"];
+  const deviceIds = ["murali-living-room", "bellezea-outdoor", "temperature-monitor"];
   const readings = [
     {aqi_us: 60, pm25_ugm3: 20, temp_c: 27, rh_pct: 60},
     {aqi_us: 100, pm25_ugm3: 38, noise_db: 53},
@@ -50,14 +50,14 @@ describe("Compare page", () => {
   });
 
   it("falls back to a common metric after switching monitors", () => {
-    const {html, requests} = renderComparison("/murali-living-room/compare?with=murali-1&metric=aqi");
+    const {html, requests} = renderComparison("/murali-living-room/compare?with=temperature-monitor&metric=aqi");
     expect(html).not.toContain(">AQI</button>");
     expect(html).toContain(">Temperature</button>");
     expect(requests[0].key[3]).toBe("temp_c");
   });
 
   it("explains when monitors have no shared metrics", () => {
-    const {html} = renderComparison("/bellezea-outdoor/compare?with=murali-1");
+    const {html} = renderComparison("/bellezea-outdoor/compare?with=temperature-monitor");
     expect(html).toContain("These monitors don’t share a metric");
     expect(html).not.toContain("Latest AQI");
   });

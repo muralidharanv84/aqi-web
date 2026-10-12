@@ -44,7 +44,7 @@ describe("metric availability on dashboard and charts", () => {
     }
   );
 
-  it.each(["murali-living-room", "murali-1"])(
+  it.each(["murali-living-room"])(
     "preserves purifier controls below metrics for %s", (deviceId) => {
       const { html } = renderMonitor(`/${deviceId}/`, { co2_ppm: 545 });
       expect(html).toContain("Purifier Control");
@@ -100,17 +100,6 @@ describe("metric availability on dashboard and charts", () => {
     );
     expect(html).toContain("Range: 24h");
     expect(seriesMetrics).toEqual(["noise_db"]);
-  });
-
-  it.each(["/", "/charts?metrics=voc_ppm"])("hides archived VOC metrics on murali-1 %s", (page) => {
-    const {html, seriesMetrics} = renderMonitor(`/murali-1${page}`, {
-      voc_ppm: 0.15, voc_index: 157, temp_c: 26.5, rh_pct: 36.7,
-    });
-    expect(html).not.toContain(">VOC</button>");
-    expect(html).not.toContain(">VOC Index</button>");
-    expect(html).not.toContain("Current AQI");
-    expect(html).toContain(">Temperature</button>");
-    expect(seriesMetrics).toEqual(["temp_c"]);
   });
 
   it("waits for readings before choosing metrics for a bookmarked chart", () => {

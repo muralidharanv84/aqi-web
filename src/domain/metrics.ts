@@ -26,19 +26,10 @@ export const METRICS: MetricDefinition[] = [
   { key: "noise_db", label: "Noise", unit: "dB", apiKey: "noise_db" },
 ];
 
-// These archived readings should not be offered for this monitor.
-const HIDDEN_METRICS_BY_DEVICE: Record<string, readonly MetricKey[] | undefined> = {
-  "murali-1": ["voc_index", "voc_ppm"],
-};
-
 export function getAvailableMetrics(
-  readings: Record<string, number | null | undefined> | undefined,
-  deviceId?: string
+  readings: Record<string, number | null | undefined> | undefined
 ): MetricDefinition[] {
-  const hiddenMetrics = deviceId ? HIDDEN_METRICS_BY_DEVICE[deviceId] : undefined;
-  return METRICS.filter((metric) =>
-    Number.isFinite(readings?.[metric.apiKey]) && !hiddenMetrics?.includes(metric.key)
-  );
+  return METRICS.filter((metric) => Number.isFinite(readings?.[metric.apiKey]));
 }
 
 export function selectAvailableMetrics(

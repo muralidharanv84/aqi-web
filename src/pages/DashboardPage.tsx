@@ -41,7 +41,7 @@ export default function DashboardPage() {
   } = useLatest(deviceId);
 
   const availableMetrics = useMemo(
-    () => getAvailableMetrics(latest?.metrics, deviceId),
+    () => getAvailableMetrics(latest?.metrics),
     [latest?.metrics, deviceId]
   );
   const sparkMetric = selectAvailableMetrics(

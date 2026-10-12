@@ -12,6 +12,7 @@ export function Routes() {
         path="/"
         element={<Navigate to={`/${DEFAULT_DEVICE_ID}/`} replace />}
       />
+      <Route path="/murali-1/*" element={<Navigate to={`/${DEFAULT_DEVICE_ID}/`} replace />} />
       <Route path="/:deviceId/" element={<DashboardPage />} />
       <Route path="/:deviceId/charts" element={<ChartsPage />} />
       <Route path="/compare" element={<Navigate to={`/${DEFAULT_DEVICE_ID}/compare`} replace />} />

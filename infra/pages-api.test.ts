@@ -27,7 +27,7 @@ describe("same-origin read API", () => {
     expect(await response.json()).toEqual({ points: [{ value: 12 }] });
   });
 
-  it.each(["/api/v1/health", "/api/v1/devices", "/api/v1/devices/murali-1/latest"])("forwards %s", async (path) => {
+  it.each(["/api/v1/health", "/api/v1/devices", "/api/v1/devices/temperature-monitor/latest"])("forwards %s", async (path) => {
     const fetch = vi.fn().mockResolvedValue(Response.json({ ok: true }));
     expect((await call(path, fetch)).status).toBe(200);
     expect(fetch).toHaveBeenCalledOnce();

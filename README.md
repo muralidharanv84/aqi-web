@@ -37,6 +37,7 @@ Sensors/device firmware (airqualitymonitor)
 ## App Routes
 
 - `/` -> redirects to `/murali-living-room/`
+- Retired `murali-1` links redirect to the default living room dashboard
 - `/:deviceId/` -> Dashboard
 - `/:deviceId/charts` -> Advanced charts
 - `/:deviceId/compare` -> Compare this monitor with another monitor
@@ -83,7 +84,6 @@ The same thresholds apply to custom ranges. The backend enforces a maximum 14-da
 - Latest data is polled every **30 seconds**
 - Latest data is marked stale if timestamp age exceeds **5 minutes**, or **1 hour** for `bellezea-outdoor` (collected every 10 minutes, with readings updating roughly every 30 minutes)
 - Dashboard cards and metric selectors on both pages show only finite values reported in the monitor's latest readings; zero is a valid reading
-- VOC and VOC Index are hidden for `murali-1`, including its archived readings
 - Noise readings are shown in **dB**, including on the `bellezea-outdoor` dashboard and charts
 - Unsupported chart selections in saved links or after switching monitors fall back to the first available metric; valid selections and the time range are preserved
 - Charts identify the averaging interval and use compact date labels at wider ranges
