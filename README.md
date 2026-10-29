@@ -7,7 +7,7 @@ This app is built with React + TypeScript + Vite, deployed on Cloudflare Pages, 
 ## What This App Does
 
 - Shows a device-specific AQI dashboard at a glance
-- Displays supporting metrics (PM2.5, CO2, VOC, temperature, humidity)
+- Displays supporting metrics (PM2.5, PM10, CO2, VOC, temperature, humidity)
 - Provides a sparkline trend on the dashboard (7-day window)
 - Provides advanced multi-metric charts with time-range controls
 - Compares a shared metric between two monitors on the same chart
@@ -85,6 +85,7 @@ The same thresholds apply to custom ranges. The backend enforces a maximum 14-da
 - Latest data is marked stale if timestamp age exceeds **5 minutes**, or **1 hour** for `bellezea-outdoor` (collected every 10 minutes, with readings updating roughly every 30 minutes)
 - Dashboard cards and metric selectors on both pages show only finite values reported in the monitor's latest readings; zero is a valid reading
 - Noise readings are shown in **dB**, including on the `bellezea-outdoor` dashboard and charts
+- Purifier control status is shown only on the `murali-living-room` dashboard, the one monitor that drives the purifiers
 - Unsupported chart selections in saved links or after switching monitors fall back to the first available metric; valid selections and the time range are preserved
 - Charts identify the averaging interval and use compact date labels at wider ranges
 - Compare defaults to living room versus outdoor AQI over 24 hours. The URL saves both monitors, the shared metric, and the range

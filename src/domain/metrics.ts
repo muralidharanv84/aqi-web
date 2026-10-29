@@ -1,6 +1,7 @@
 export type MetricKey =
   | "aqi"
   | "pm25"
+  | "pm10"
   | "co2"
   | "voc_index"
   | "voc_ppm"
@@ -18,6 +19,7 @@ export type MetricDefinition = {
 export const METRICS: MetricDefinition[] = [
   { key: "aqi", label: "AQI", unit: "", apiKey: "aqi_us" },
   { key: "pm25", label: "PM2.5", unit: "ug/m3", apiKey: "pm25_ugm3" },
+  { key: "pm10", label: "PM10", unit: "ug/m3", apiKey: "pm10_ugm3" },
   { key: "co2", label: "CO2", unit: "ppm", apiKey: "co2_ppm" },
   { key: "voc_index", label: "VOC Index", unit: "", apiKey: "voc_index" },
   { key: "voc_ppm", label: "VOC", unit: "ppm", apiKey: "voc_ppm" },
@@ -64,6 +66,16 @@ const PM25_SCALE: MetricScale[] = [
   { max: Number.POSITIVE_INFINITY, label: "Hazardous", color: "#7f1d1d" },
 ];
 
+// US EPA PM10 24-hour breakpoints.
+const PM10_SCALE: MetricScale[] = [
+  { max: 54, label: "Good", color: "#22c55e" },
+  { max: 154, label: "Moderate", color: "#facc15" },
+  { max: 254, label: "Sensitive", color: "#f97316" },
+  { max: 354, label: "Unhealthy", color: "#ef4444" },
+  { max: 424, label: "Very Unhealthy", color: "#dc2626" },
+  { max: Number.POSITIVE_INFINITY, label: "Hazardous", color: "#7f1d1d" },
+];
+
 const CO2_SCALE: MetricScale[] = [
   { max: 800, label: "Fresh", color: "#22c55e" },
   { max: 1000, label: "Fair", color: "#facc15" },
@@ -102,13 +114,15 @@ export function getMetricStatus(
   const scale =
     key === "pm25"
       ? PM25_SCALE
-      : key === "co2"
-        ? CO2_SCALE
-        : key === "voc_index"
-          ? VOC_INDEX_SCALE
-          : key === "voc_ppm"
-            ? VOC_PPM_SCALE
-            : null;
+      : key === "pm10"
+        ? PM10_SCALE
+        : key === "co2"
+          ? CO2_SCALE
+          : key === "voc_index"
+            ? VOC_INDEX_SCALE
+            : key === "voc_ppm"
+              ? VOC_PPM_SCALE
+              : null;
 
   if (!scale) {
     return null;

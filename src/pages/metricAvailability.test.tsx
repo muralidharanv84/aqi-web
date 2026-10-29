@@ -36,9 +36,12 @@ function renderMonitor(location: string, metrics?: Record<string, number | null>
 }
 
 describe("metric availability on dashboard and charts", () => {
-  it.each([undefined, { aqi_us: 50, pm25_ugm3: 12 }])(
-    "hides outdoor purifier controls regardless of loading state (%j)", (metrics) => {
-      const { html } = renderMonitor("/bellezea-outdoor/", metrics);
+  it.each([
+    ["bellezea-outdoor", undefined], ["bellezea-outdoor", { aqi_us: 50, pm25_ugm3: 12 }],
+    ["murali-outdoor", undefined], ["murali-outdoor", { aqi_us: 50, pm25_ugm3: 12 }],
+  ])(
+    "hides purifier controls on %s regardless of loading state (%j)", (deviceId, metrics) => {
+      const { html } = renderMonitor(`/${deviceId}/`, metrics);
       expect(html).not.toContain("Purifier Control");
       expect(html).not.toContain("Last control run");
     }
@@ -90,6 +93,14 @@ describe("metric availability on dashboard and charts", () => {
     expect(html).not.toContain(">VOC</button>");
     expect(html).not.toContain(">VOC Index</button>");
     expect(html).not.toContain(">Noise</button>");
+  });
+
+  it.each(["/", "/charts"])("shows outdoor PM10 on murali-outdoor %s", (page) => {
+    const {html} = renderMonitor(`/murali-outdoor${page}`, {
+      aqi_us: 60, pm25_ugm3: 17, pm10_ugm3: 42, temp_c: 21, rh_pct: 70,
+    });
+    expect(html).toContain(">PM10</button>");
+    if (page === "/") expect(html).toContain("42 ug/m3");
   });
 
   it("uses available metrics for a bookmarked chart without querying unsupported ones", () => {

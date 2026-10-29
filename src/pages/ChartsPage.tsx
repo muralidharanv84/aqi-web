@@ -35,6 +35,7 @@ import { CHART_RANGES, useChartRange } from "../query/chartRange";
 const METRIC_COLORS: Record<MetricKey, string> = {
   aqi: "#0f172a",
   pm25: "#0ea5e9",
+  pm10: "#f59e0b",
   co2: "#1d4ed8",
   voc_index: "#14b8a6",
   voc_ppm: "#06b6d4",
@@ -178,6 +179,7 @@ export default function ChartsPage() {
     const lookup: Record<MetricKey, Map<number, NormalizedSeriesPoint>> = {
       aqi: new Map(),
       pm25: new Map(),
+      pm10: new Map(),
       co2: new Map(),
       voc_index: new Map(),
       voc_ppm: new Map(),

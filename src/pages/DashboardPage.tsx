@@ -22,6 +22,9 @@ import { useDevices } from "../query/devices";
 import { useLatest } from "../query/latest";
 import { useSeries } from "../query/series";
 
+// The only monitor whose readings drive the Winix purifiers.
+const PURIFIER_MONITOR_ID = "murali-living-room";
+
 export default function DashboardPage() {
   const navigate = useNavigate();
   const { deviceId } = useParams();
@@ -190,7 +193,7 @@ export default function DashboardPage() {
         ) : (
           <MetricCards metrics={cards} />
         )}
-        {deviceId !== "bellezea-outdoor" ? (
+        {deviceId === PURIFIER_MONITOR_ID ? (
           <PurifierControlPanel fanControl={latest?.fan_control ?? null} />
         ) : null}
         {sparkMetric ? (
